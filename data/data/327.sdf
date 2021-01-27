@@ -1,0 +1,49 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig327.pdbqt
+ OpenBabel01212114253D
+
+ 14 13  0  0  1  0  0  0  0  0999 V2000
+   -3.7220   -0.4900    1.7990 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -3.2770   -1.7290    1.0100 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -4.1190   -1.9610   -0.2300 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.1660   -1.1920   -1.1840 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.9260   -1.5480    0.6120 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.6610   -2.3560    0.1440 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9520   -0.7190    2.6910 C   0  0  1  0  0  0  0  0  0  0  0  0
+   -4.7530   -1.8880    3.6570 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.8380   -1.4950    4.6750 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.3790   -2.3000    4.9610 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.2250    0.4570    3.4510 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.3770    0.9120    3.5650 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.6420   -0.0250    2.6090 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.0390    0.3260    3.4200 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1 13  1  1  0  0  0
+  1  7  1  0  0  0  0
+  2  3  1  6  0  0  0
+  2  1  1  0  0  0  0
+  4  3  2  0  0  0  0
+  5  2  1  0  0  0  0
+  6  5  1  0  0  0  0
+  7 11  1  0  0  0  0
+  7  8  1  1  0  0  0
+  8  9  1  0  0  0  0
+  9 10  1  0  0  0  0
+ 11 12  1  0  0  0  0
+ 13 14  1  0  0  0  0
+M  END
+>  <REMARK>
+ VINA RESULT:      -4.7      1.069      3.836
+  8 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_1  and  C_3 
+    2  A    between atoms: C_2  and  C_4 
+    3  A    between atoms: C_2  and  O_7 
+    4  A    between atoms: C_3  and  C_5 
+    5  A    between atoms: C_3  and  O_8 
+    6  A    between atoms: C_4  and  C_5 
+    7  A    between atoms: C_4  and  O_9 
+    8  A    between atoms: C_5  and  O_10 
+
+>  <TORSDO>
+F 8
+
+$$$$

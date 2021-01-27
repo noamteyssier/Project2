@@ -1,0 +1,69 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig2148.pdbqt
+ OpenBabel01212114223D
+
+ 19 18  0  0  0  0  0  0  0  0999 V2000
+   -5.5670   -0.5850    2.9710 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9720   -0.3490    4.4300 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.2800   -1.2920    5.4180 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -6.0000   -2.6400    5.4870 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.3170   -3.7480    4.6740 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5980   -4.8130    5.5000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.9150   -5.8460    4.6370 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.9190   -5.6240    3.9600 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5710   -7.0380    4.7340 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9970   -6.9560    4.8090 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9130    0.6050    2.2590 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.5250    0.2940    1.6920 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.1190   -1.1530    1.9820 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.8890   -1.9340    0.6860 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.1730   -2.0200   -0.1420 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.3000   -2.7910    0.5550 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.8290   -4.0870    1.2190 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9880   -5.3180    0.3230 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.7620   -6.4520    0.9770 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+  3  4  1  0  0  0  0
+  5  4  1  0  0  0  0
+  5  6  1  0  0  0  0
+  7  9  1  0  0  0  0
+  7  6  1  0  0  0  0
+  8  7  2  0  0  0  0
+  9 10  1  0  0  0  0
+ 11  1  1  0  0  0  0
+ 12 13  1  0  0  0  0
+ 12 11  1  0  0  0  0
+ 14 13  1  0  0  0  0
+ 15 16  1  0  0  0  0
+ 15 14  1  0  0  0  0
+ 16 17  1  0  0  0  0
+ 18 19  1  0  0  0  0
+ 18 17  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:      -1.6      0.000      0.000
+  15 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_1  and  C_4 
+    2  A    between atoms: C_1  and  O_19 
+    3  A    between atoms: C_4  and  C_6 
+    4  A    between atoms: C_5  and  C_7 
+    5  A    between atoms: C_6  and  C_8 
+    6  A    between atoms: C_7  and  C_9 
+    7  A    between atoms: C_8  and  C_10 
+    8  A    between atoms: C_9  and  C_11 
+    9  A    between atoms: C_10  and  C_12 
+   10  A    between atoms: C_11  and  C_13 
+   11  A    between atoms: C_12  and  C_14 
+   12  A    between atoms: C_13  and  C_15 
+   13  A    between atoms: C_14  and  C_16 
+   14  A    between atoms: C_15  and  C_17 
+   15  A    between atoms: C_16  and  C_17 
+
+>  <TORSDO>
+F 15
+
+$$$$

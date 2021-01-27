@@ -1,0 +1,53 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig800.pdbqt
+ OpenBabel01212114373D
+
+ 14 13  0  0  0  0  0  0  0  0999 V2000
+   -4.5500    0.0010    2.0730 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.4890   -0.5900    3.1260 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.7890   -1.6290    3.9550 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.3400   -2.8050    4.2920 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6550   -3.8000    5.0850 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.4560   -5.0600    4.6690 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7500   -6.0970    5.4790 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.4700   -0.9780    1.6000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7190   -1.6400    0.2410 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.7490   -2.7700    0.2980 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.2180   -4.0380    0.9770 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.1880   -5.2150    0.9650 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6140   -6.3110    0.2690 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5240   -7.0370    0.9100 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+  3  4  2  0  0  0  0
+  4  5  1  0  0  0  0
+  6  5  2  0  0  0  0
+  6  7  1  0  0  0  0
+  8  1  1  0  0  0  0
+  9 10  1  0  0  0  0
+  9  8  1  0  0  0  0
+ 10 11  1  0  0  0  0
+ 12 11  1  0  0  0  0
+ 13 14  1  0  0  0  0
+ 13 12  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:      -3.8      0.000      0.000
+  9 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_1  and  C_2 
+    2  A    between atoms: C_4  and  C_6 
+    3  A    between atoms: C_6  and  C_7 
+    4  A    between atoms: C_7  and  C_8 
+    5  A    between atoms: C_8  and  C_9 
+    6  A    between atoms: C_9  and  C_10 
+    7  A    between atoms: C_10  and  C_11 
+    8  A    between atoms: C_11  and  C_12 
+    9  A    between atoms: C_12  and  O_13 
+
+>  <TORSDO>
+F 9
+
+$$$$

@@ -1,0 +1,103 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig5297.pdbqt
+ OpenBabel01212114303D
+
+ 30 29  0  0  0  0  0  0  0  0999 V2000
+   -5.9760   -1.0000    2.9710 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.8580   -0.4790    4.4050 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.1000   -1.4280    5.3400 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5150   -2.6450    4.6180 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5760   -3.9000    5.4930 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.8700   -4.6950    5.2920 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.6210   -6.1590    4.9180 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9970   -6.4900    3.4690 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.6210   -5.4290    2.4280 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.0480   -6.0190    1.1370 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.4670   -4.9280    0.2330 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.2500   -4.2220    0.8410 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.2160   -2.6980    0.6840 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.3050   -2.0990   -0.2090 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7580   -1.4070   -1.4470 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.3030   -0.0430    1.9820 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.9970    0.5610    2.5080 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.7330   -0.2730    2.2740 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.5570    0.4690    1.6320 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.3780    0.6810    2.5850 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.1860    2.0970    2.4560 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.2340    2.4550    3.5160 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.4010    1.4660    3.6180 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.0720    1.1180    2.2840 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.0150   -0.3760    1.9530 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.3320   -0.8560    1.3390 C   0  0  0  0  0  0  0  0  0  0  0  0
+    5.2670    0.3140    1.0430 C   0  0  0  0  0  0  0  0  0  0  0  0
+    5.8730    0.2110   -0.3500 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.9470   -0.4420   -1.2070 O   0  0  0  0  0  0  0  0  0  0  0  0
+    4.1070    0.0380   -1.1300 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+  4  3  1  0  0  0  0
+  4  5  1  0  0  0  0
+  6  5  1  0  0  0  0
+  7  6  1  0  0  0  0
+  8  7  1  0  0  0  0
+  9  8  1  0  0  0  0
+ 10  9  1  0  0  0  0
+ 11 12  1  0  0  0  0
+ 11 10  1  0  0  0  0
+ 13 12  2  0  0  0  0
+ 14 13  1  0  0  0  0
+ 15 14  1  0  0  0  0
+ 16 17  1  0  0  0  0
+ 16  1  1  0  0  0  0
+ 18 17  1  0  0  0  0
+ 19 18  1  0  0  0  0
+ 19 20  1  0  0  0  0
+ 21 20  1  0  0  0  0
+ 21 22  1  0  0  0  0
+ 22 23  1  0  0  0  0
+ 24 23  1  0  0  0  0
+ 25 24  1  0  0  0  0
+ 26 25  1  0  0  0  0
+ 27 26  1  0  0  0  0
+ 28 27  1  0  0  0  0
+ 29 30  1  0  0  0  0
+ 29 28  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:       2.5      0.000      0.000
+  27 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_2  and  C_3 
+    2  A    between atoms: C_3  and  C_4 
+    3  A    between atoms: C_4  and  C_5 
+    4  A    between atoms: C_5  and  C_6 
+    5  A    between atoms: C_6  and  C_7 
+    6  A    between atoms: C_7  and  C_8 
+    7  A    between atoms: C_8  and  C_9 
+    8  A    between atoms: C_9  and  C_10 
+    9  A    between atoms: C_10  and  C_11 
+   10  A    between atoms: C_11  and  C_12 
+   11  A    between atoms: C_12  and  C_13 
+   12  A    between atoms: C_13  and  C_14 
+   13  A    between atoms: C_14  and  C_15 
+   14  A    between atoms: C_15  and  C_16 
+   15  A    between atoms: C_16  and  C_17 
+   16  A    between atoms: C_17  and  C_18 
+   17  A    between atoms: C_18  and  C_19 
+   18  A    between atoms: C_19  and  C_20 
+   19  A    between atoms: C_20  and  C_21 
+   20  A    between atoms: C_21  and  C_22 
+   21  A    between atoms: C_22  and  C_23 
+   22  A    between atoms: C_23  and  C_24 
+   23  A    between atoms: C_24  and  C_25 
+   24  A    between atoms: C_25  and  C_26 
+   25  A    between atoms: C_26  and  C_27 
+   26  A    between atoms: C_27  and  C_28 
+   27  A    between atoms: C_28  and  O_29 
+
+>  <TORSDO>
+F 27
+
+$$$$

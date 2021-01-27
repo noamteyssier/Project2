@@ -1,0 +1,23 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig56.pdbqt
+ OpenBabel01212114313D
+
+  5  4  0  0  0  0  0  0  0  0999 V2000
+   -4.0630   -1.1890   -0.8600 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.9540   -0.5360    1.6320 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.1400   -3.0170    0.9560 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.1480   -1.7100    0.5280 F   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7370   -1.6020    0.5680 P   0  0  0  0  0  0  0  0  0  0  0  0
+  1  5  2  0  0  0  0
+  4  5  1  0  0  0  0
+  5  3  1  0  0  0  0
+  5  2  1  0  0  0  0
+M  END
+>  <REMARK>
+ VINA RESULT:      -3.2      1.606      2.122
+  0 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+
+>  <TORSDO>
+F 0
+
+$$$$

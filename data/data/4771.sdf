@@ -1,0 +1,97 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig4771.pdbqt
+ OpenBabel01212114293D
+
+ 28 27  0  0  0  0  0  0  0  0999 V2000
+   -5.2550   -2.6870    3.6960 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.3600   -2.6040    4.9340 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.8980   -3.9730    5.4450 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9730   -5.0650    5.4990 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6790   -6.3300    4.6860 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.7690   -6.6550    3.6610 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9760   -5.5430    2.6290 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9980   -6.0590    1.1870 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6580   -5.8900    0.4630 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.6530   -4.9550    1.1420 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.9290   -3.4570    0.9800 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.0310   -3.0910   -0.0200 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6120   -2.0150   -1.0200 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.1910   -1.5390   -0.7560 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9380   -1.3470    3.4150 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.1430   -0.1340    3.9130 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.4930    0.7300    2.8270 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.8500   -0.0790    1.6980 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.4390   -0.5350    2.0810 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.5040    0.6620    2.2650 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.1460    0.2890    2.8660 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.7760    1.4620    3.2210 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3960    2.1410    1.9980 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.2280    1.1940    1.1290 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.4430    0.5580    1.8130 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.4470   -0.0800    0.8610 C   0  0  0  0  0  0  0  0  0  0  0  0
+    5.7330    0.4910    1.0500 O   0  0  0  0  0  0  0  0  0  0  0  0
+    5.5930    1.3930    1.3850 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+  3  4  1  0  0  0  0
+  5  4  1  0  0  0  0
+  6  5  1  0  0  0  0
+  7  6  1  0  0  0  0
+  8  7  1  0  0  0  0
+  9 10  1  0  0  0  0
+  9  8  1  0  0  0  0
+ 11 10  2  0  0  0  0
+ 12 11  1  0  0  0  0
+ 13 14  1  0  0  0  0
+ 13 12  1  0  0  0  0
+ 15  1  1  0  0  0  0
+ 15 16  1  0  0  0  0
+ 17 16  1  0  0  0  0
+ 18 19  1  0  0  0  0
+ 18 17  1  0  0  0  0
+ 19 20  1  0  0  0  0
+ 20 21  1  0  0  0  0
+ 21 22  1  0  0  0  0
+ 23 22  1  0  0  0  0
+ 24 25  1  0  0  0  0
+ 24 23  1  0  0  0  0
+ 26 27  1  0  0  0  0
+ 26 25  1  0  0  0  0
+ 27 28  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:       0.9      0.000      0.000
+  25 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_2  and  C_3 
+    2  A    between atoms: C_3  and  C_4 
+    3  A    between atoms: C_4  and  C_5 
+    4  A    between atoms: C_5  and  C_6 
+    5  A    between atoms: C_6  and  C_7 
+    6  A    between atoms: C_7  and  C_8 
+    7  A    between atoms: C_8  and  C_9 
+    8  A    between atoms: C_9  and  C_10 
+    9  A    between atoms: C_10  and  C_11 
+   10  A    between atoms: C_11  and  C_12 
+   11  A    between atoms: C_12  and  C_13 
+   12  A    between atoms: C_13  and  C_14 
+   13  A    between atoms: C_14  and  C_15 
+   14  A    between atoms: C_15  and  C_16 
+   15  A    between atoms: C_16  and  C_17 
+   16  A    between atoms: C_17  and  C_18 
+   17  A    between atoms: C_18  and  C_19 
+   18  A    between atoms: C_19  and  C_20 
+   19  A    between atoms: C_20  and  C_21 
+   20  A    between atoms: C_21  and  C_22 
+   21  A    between atoms: C_22  and  C_23 
+   22  A    between atoms: C_23  and  C_24 
+   23  A    between atoms: C_24  and  C_25 
+   24  A    between atoms: C_25  and  C_26 
+   25  A    between atoms: C_26  and  O_27 
+
+>  <TORSDO>
+F 25
+
+$$$$

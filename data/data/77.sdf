@@ -1,0 +1,40 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig77.pdbqt
+ OpenBabel01212114363D
+
+ 10  9  0  0  0  0  0  0  0  0999 V2000
+    1.7940    1.8610    2.7540 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.8720   -0.2350    1.9580 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0560    2.9470    2.3390 N   0  0  0  0  0  0  0  0  0  0  0  0
+    2.1180    0.9820    1.7480 N   0  0  0  0  0  0  0  0  0  0  0  0
+    2.1210    1.6830    3.9310 O   0  0  0  0  0  0  0  0  0  0  0  0
+    0.7960    3.0780    1.3680 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.6870    3.8610    3.3340 O   0  0  0  0  0  0  0  0  0  0  0  0
+    0.6290    4.6750    2.8060 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.7540    1.1690    0.4070 O   0  0  0  0  0  0  0  0  0  0  0  0
+    2.2400    1.9870    0.2060 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  5  2  0  0  0  0
+  3  1  1  0  0  0  0
+  3  7  1  0  0  0  0
+  4  2  1  0  0  0  0
+  4  1  1  0  0  0  0
+  6  3  1  0  0  0  0
+  8  7  1  0  0  0  0
+  9  4  1  0  0  0  0
+ 10  9  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:      -4.5      0.000      0.000
+  2 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+       I    between atoms: C_1  and  N_3 
+       I    between atoms: C_1  and  N_4 
+    1  A    between atoms: N_3  and  O_6 
+    2  A    between atoms: N_4  and  O_7 
+
+>  <TORSDO>
+F 2
+
+$$$$

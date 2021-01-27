@@ -1,0 +1,56 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig840.pdbqt
+ OpenBabel01212114383D
+
+ 15 14  0  0  0  0  0  0  0  0999 V2000
+   -3.8770   -1.7270   -0.0960 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.9780   -1.3510    1.0810 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7080   -0.5550    2.1430 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.9650    0.7360    1.7620 N   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.6890    1.0950    0.8550 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.0150   -1.0540    3.2240 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6330    1.5290    2.7040 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.0390    1.4310    3.4680 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9110   -2.7940    0.2740 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.2620   -3.9580    1.0240 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.1500   -5.2050    0.9940 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.8130   -5.4500    2.3510 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9480   -4.9160    3.4940 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.9060   -5.8480    4.7080 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.5140   -6.0130    5.2980 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  9  1  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+  3  6  2  0  0  0  0
+  4  3  1  0  0  0  0
+  4  7  1  0  0  0  0
+  5  4  1  0  0  0  0
+  7  8  1  0  0  0  0
+  9 10  1  0  0  0  0
+ 11 10  1  0  0  0  0
+ 11 12  1  0  0  0  0
+ 12 13  1  0  0  0  0
+ 13 14  1  0  0  0  0
+ 14 15  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:      -4.5      0.000      0.000
+  9 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_1  and  C_3 
+       I    between atoms: C_1  and  N_11 
+    2  A    between atoms: C_3  and  C_5 
+    3  A    between atoms: C_4  and  C_6 
+    4  A    between atoms: C_5  and  C_7 
+    5  A    between atoms: C_6  and  C_8 
+    6  A    between atoms: C_7  and  C_9 
+    7  A    between atoms: C_8  and  C_10 
+    8  A    between atoms: C_9  and  C_10 
+    9  A    between atoms: N_11  and  O_13 
+
+>  <TORSDO>
+F 9
+
+$$$$

@@ -1,0 +1,71 @@
+/Users/student/Downloads/SI/DockingResults/Interface/LigandPosesDockedAll_Interface/LigandsOut_0/Ligands/Lig2392.pdbqt
+ OpenBabel01212114233D
+
+ 20 19  0  0  0  0  0  0  0  0999 V2000
+   -5.6720   -2.4870    0.9290 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9960   -3.6650    1.4820 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.8600   -2.3500   -0.3260 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.7180   -1.3380   -0.1930 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.7720   -1.5650    0.9930 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.7240   -0.4410    2.0330 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.0790   -0.1560    2.6840 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.6710    1.1620    2.1720 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9650    1.5320    2.8890 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.8200    2.2310    4.2460 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.5470    3.4640    4.1690 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.9990    1.5140    5.2680 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.5880   -4.9930    0.9160 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.0800   -5.2460    1.0030 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.5070   -5.3360    2.4220 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.5300   -5.7920    3.4660 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.0770   -5.4230    4.8810 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.8850   -4.2790    5.5000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -4.3760   -2.8910    5.1060 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -5.5100   -1.8800    5.0510 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  2  0  0  0  0
+  3  4  1  0  0  0  0
+  3  1  1  0  0  0  0
+  4  5  1  0  0  0  0
+  5  6  1  0  0  0  0
+  6  7  1  0  0  0  0
+  8  7  1  0  0  0  0
+  8  9  1  0  0  0  0
+  9 10  1  0  0  0  0
+ 10 12  1  0  0  0  0
+ 11 10  2  0  0  0  0
+ 13 14  1  0  0  0  0
+ 13  2  1  0  0  0  0
+ 14 15  1  0  0  0  0
+ 15 16  1  0  0  0  0
+ 16 17  1  0  0  0  0
+ 17 18  1  0  0  0  0
+ 19 18  1  0  0  0  0
+ 20 19  1  0  0  0  0
+M  END
+>  <MODEL>
+1
+
+>  <REMARK>
+ VINA RESULT:      -1.7      0.000      0.000
+  15 active torsions:
+  status: ('A' for Active; 'I' for Inactive)
+    1  A    between atoms: C_1  and  C_5 
+    2  A    between atoms: C_2  and  C_6 
+    3  A    between atoms: C_3  and  C_7 
+    4  A    between atoms: C_5  and  C_9 
+    5  A    between atoms: C_6  and  C_10 
+    6  A    between atoms: C_7  and  C_11 
+    7  A    between atoms: C_8  and  C_12 
+    8  A    between atoms: C_9  and  C_13 
+    9  A    between atoms: C_10  and  C_14 
+   10  A    between atoms: C_11  and  C_15 
+   11  A    between atoms: C_12  and  C_16 
+   12  A    between atoms: C_13  and  C_17 
+   13  A    between atoms: C_14  and  C_18 
+   14  A    between atoms: C_15  and  C_17 
+   15  A    between atoms: C_16  and  C_18 
+
+>  <TORSDO>
+F 15
+
+$$$$
