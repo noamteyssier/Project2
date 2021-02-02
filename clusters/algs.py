@@ -2,201 +2,202 @@
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+import sys
+
 
 class Ligand():
 
-	"""
-	Handles relevant information and tools for ligands
+    """
+    Handles relevant information and tools for ligands
 
-	- IO
-	- SparseArrays
-	- Values
+    - IO
+    - SparseArrays
+    - Values
 
-	"""
+    """
 
-	def __init__(self, csv):
-		self.csv = csv
-		self.csv_frame = self._load_csv(csv)
-		self.sparse, self.lookup = self._prepare_sparse()
+    def __init__(self, csv):
+        self.csv = csv
+        self.csv_frame = self._load_csv(csv)
+        self.sparse, self.lookup = self._prepare_sparse()
 
-	def _load_csv(self, csv):
+    def _load_csv(self, csv):
+        """
+        read in csv from path
+        """
 
-		"""
-		read in csv from path
-		"""
+        frame = pd.read_csv(csv, sep=",")
+        frame['idx'] = np.arange(frame.shape[0])
+        return frame
 
-		frame = pd.read_csv(csv, sep=",")
-		frame['idx'] = np.arange(frame.shape[0])
-		return frame
+    def _prepare_sparse(self):
+        """
+        process onbits into sets for pairwise evaluation
+        create lookup table for ligand index with ligand name
+        """
 
-	def _prepare_sparse(self):
+        sparse = {}
+        lookup = {}
 
-		"""
-		process onbits into sets for pairwise evaluation
-		create lookup table for ligand index with ligand name
-		"""
+        self.csv_frame.apply(
+            lambda x: sparse.update(
+                {
+                    x.idx: set([int(i) for i in x.OnBits.split(",")])
+                }),
+            axis=1
+        )
 
-		sparse = {}
-		lookup = {}
+        self.csv_frame.apply(
+            lambda x: lookup.update(
+                {
+                    x.idx: x.LigandID
+                }),
+            axis=1
+        )
 
-		self.csv_frame.apply(
-			lambda x : sparse.update(
-				{
-					x.idx : set([int(i) for i in x.OnBits.split(",")])
-				}),
-			axis = 1
-		)
+        return sparse, lookup
 
-		self.csv_frame.apply(
-			lambda x : lookup.update(
-				{
-					x.idx : x.LigandID
-				}),
-			axis = 1
-		)
+    def PairwiseIter(self):
+        """
+        iterates unique pairwise combinations of observations
+        """
 
-		return sparse, lookup
+        for idx, i_bits in self.__iter__():
 
-	def PairwiseIter(self):
+            for jdx, j_bits in self.__iter__():
 
-		"""
-		iterates unique pairwise combinations of observations
-		"""
+                if jdx <= idx:
+                    continue
 
-		already_seen = set()
+                yield idx, jdx, i_bits, j_bits
 
-		for idx, i_bits in self.__iter__():
+    def __iter__(self):
+        idx_order = sorted([i for i in self.sparse])
+        for idx in idx_order:
+            yield (idx, self.sparse[idx])
 
-			for jdx, j_bits in self.__iter__():
+    def __len__(self):
+        return len(self.sparse)
 
-				if jdx <= idx:
-					continue
-
-				yield idx, jdx, i_bits, j_bits
-
-	def __iter__(self):
-		idx_order = sorted([i for i in self.sparse])
-		for idx in idx_order:
-			yield (idx, self.sparse[idx])
-
-	def __len__(self):
-		return len(self.sparse)
 
 class Clustering():
 
-	"""
-	Parent class for HierarchicalClustering and PartitionClustering
-	"""
+    """
+    Parent class for HierarchicalClustering and PartitionClustering
+    """
 
-	def __init__(self, ligands, metric='jaccard'):
+    def __init__(self, ligands, metric='jaccard'):
 
-		self.ligands = ligands
-		self.metric = metric
+        self.ligands = ligands
+        self.metric = metric
 
-		self.distvec = np.array([])
-		self.index_tup_vec = dict()
-		self.index_vec_tup = dict()
+        self.distvec = np.array([])
+        self.index_tup_vec = dict()
+        self.index_vec_tup = dict()
 
-		self._build_distmat()
+        self._build_distmat()
 
-	def distance_jaccard(self, x, y):
+    def distance_jaccard(self, x, y):
+        """
+        Implements Jaccard Distance
+        Intersection / Union
 
-		"""
-		Implements Jaccard Distance
-		Intersection / Union
+        Params:
+        ------
+        x :
+            a set of values
+        y :
+            a set of values
 
-		Params:
-		------
-		x :
-			a set of values
-		y :
-			a set of values
+        Returns:
+        -------
+        distance :
+            float
+        """
 
-		Returns:
-		-------
-		distance :
-			float
-		"""
+        size_ix = len(x.intersection(y))
+        size_un = len(x.union(y))
+        similarity = (size_ix / size_un)
+        distance = 1 - similarity
 
-		size_ix = len(x.intersection(y))
-		size_un = len(x.union(y))
-		similarity = (size_ix / size_un)
-		distance = 1 - similarity
+        return distance
 
-		return distance
+    def _distance(self, x, y):
 
-	def _distance(self, x, y):
+        if self.metric == "jaccard":
+            return self.distance_jaccard(x, y)
+        else:
+            print("Given Metric <{}> not implemented".format(self.metric))
+            sys.exit()
 
-		if self.metric == "jaccard":
-			return self.distance_jaccard(x, y)
-		else:
-			print("Given Metric <{}> not implemented".format(self.metric))
-			sys.exit()
+    def _build_distmat(self):
+        """
+        initializes pairwise distances for ligand set
+        """
 
-	def _build_distmat(self):
+        num_ligands = len(self.ligands)
+        num_comparisons = int((num_ligands * (num_ligands - 1)) / 2)
 
-		"""
-		initializes pairwise distances for ligand set
-		"""
+        self.distvec = np.zeros(num_comparisons)
+        self.index_tup_vec = dict()
+        self.index_vec_tup = dict()
 
-		num_ligands = len(self.ligands)
-		num_comparisons = int((num_ligands * (num_ligands - 1)) / 2)
+        for index, vals in enumerate(self.ligands.PairwiseIter()):
+            idx, jdx, i_bits, j_bits = vals
 
-		self.distvec = np.zeros(num_comparisons)
-		self.index_tup_vec = dict()
-		self.index_vec_tup = dict()
+            self.index_tup_vec[(idx, jdx)] = index
+            self.index_vec_tup[index] = (idx, jdx)
 
-		for index, (idx, jdx, i_bits, j_bits) in enumerate(self.ligands.PairwiseIter()):
+            self.distvec[index] = self._distance(i_bits, j_bits)
 
-			self.index_tup_vec[(idx,jdx)] = index
-			self.index_vec_tup[index] = (idx, jdx)
+    def fit(self):
+        return self.__fit__()
 
-			self.distvec[index] = self._distance(i_bits, j_bits)
-
-	def fit(self):
-		return self.__fit__()
 
 class HierarchicalClustering(Clustering):
 
-	"""
-	Methods for Hierarchical Clustering
-	"""
+    """
+    Methods for Hierarchical Clustering
+    """
 
-	def __fit__(self):
-		print(self.distvec)
+    def __fit__(self):
+        print(self.distvec)
+
 
 class PartitionClustering(Clustering):
 
-	"""
-	Methods for Hierarchical Clustering
-	"""
+    """
+    Methods for Hierarchical Clustering
+    """
 
-	pass
+    pass
+
 
 class qCluster():
 
-	"""
-	Evaluates the quality of a given clustering scheme
-	"""
+    """
+    Evaluates the quality of a given clustering scheme
+    """
 
-	pass
+    pass
+
 
 class simCluster():
 
-	"""
-	Evaluates the similarity between a set of a clusters
-	"""
+    """
+    Evaluates the similarity between a set of a clusters
+    """
 
-	pass
+    pass
+
 
 def main():
-	l = Ligand("../data/test_set.csv")
+    ligand_obj = Ligand("../data/test_set.csv")
+    hcl = HierarchicalClustering(ligand_obj)
+    hcl.fit()
 
-	hcl = HierarchicalClustering(l)
-	hcl.fit()
+    pass
 
-	pass
 
 if __name__ == '__main__':
-	main()
+    main()
