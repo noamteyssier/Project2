@@ -277,7 +277,7 @@ class HierarchicalClustering(Clustering):
         calculates pairwise distance between clusters and applies
         chosen linkage method
         """
-        
+
         dists = self._get_cluster_distances(x, y)
 
         return self.linkage_method(dists)
