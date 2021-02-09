@@ -272,16 +272,27 @@ class HierarchicalClustering(Clustering):
         """
         return np.mean(d)
 
-    def _linkage(self, c1, c2):
+    def _linkage(self, x, y):
         """
         calculates pairwise distance between clusters and applies
         chosen linkage method
         """
-        x = self._get_cluster_members(c1)
-        y = self._get_cluster_members(c2)
+        
         dists = self._get_cluster_distances(x, y)
 
         return self.linkage_method(dists)
+
+    def _cluster_members(self):
+        """
+        organizes current clusters and members
+        """
+
+        self.unique_clusters = np.unique(self.labels)
+        self.cluster_members = {
+            u: self._get_cluster_members(u) for u in self.unique_clusters
+        }
+
+        return self.unique_clusters, self.cluster_members
 
     def _minimum_distance(self, verbose=False):
         """
@@ -289,13 +300,16 @@ class HierarchicalClustering(Clustering):
         all clusters
         """
 
-        unique_clusters = np.unique(self.labels)
+        self.unique_clusters, self.cluster_members = self._cluster_members()
         min_dist = 1
         min_pair = None
 
-        for c1, c2 in self._pairwise_iter(unique_clusters):
+        for c1, c2 in self._pairwise_iter(self.unique_clusters):
 
-            dist = self._linkage(c1, c2)
+            dist = self._linkage(
+                self.cluster_members[c1],
+                self.cluster_members[c2]
+                )
 
             if dist <= min_dist:
                 min_dist = dist
@@ -329,6 +343,9 @@ class HierarchicalClustering(Clustering):
 
         # main loop
         for iter in np.arange(self.zmat.shape[0]):
+
+            # find cluster members
+            self.cluster_members = self._cluster_members()
 
             # find minimal distance
             x, y, dist = self._minimum_distance(verbose=verbose)
