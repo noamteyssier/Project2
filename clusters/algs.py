@@ -71,6 +71,14 @@ class Ligand():
 
                 yield idx, jdx, i_bits, j_bits
 
+    def GetMolecule(self, index):
+        """
+        Returns sparse molecular values of a given index
+
+        Will map index to ligand id and return sparse.
+        """
+        return self.sparse[self.lookup[index]]
+
     def __iter__(self):
         idx_order = sorted([i for i in self.sparse])
         for idx in idx_order:
@@ -97,7 +105,7 @@ class Clustering():
 
         self._build_distmat()
 
-    def distance_jaccard(self, x, y):
+    def jaccard(self, x, y):
         """
         Implements Jaccard Distance
         Intersection / Union
@@ -125,7 +133,7 @@ class Clustering():
     def _distance(self, x, y):
 
         if self.metric == "jaccard":
-            return self.distance_jaccard(x, y)
+            return self.jaccard(x, y)
         else:
             print("Given Metric <{}> not implemented".format(self.metric))
             sys.exit()
@@ -150,8 +158,15 @@ class Clustering():
 
             self.distvec[index] = self._distance(i_bits, j_bits)
 
-    def fit(self):
-        return self.__fit__()
+    def _get_distance(self, idx, jdx):
+        """
+        finds distance between ligand index <idx> and ligand index <jdx>
+        """
+        tup = tuple(sorted((idx, jdx)))
+        return self.distvec[self.index_tup_vec[tup]]
+
+    def fit(self, **kwargs):
+        return self.__fit__(**kwargs)
 
 
 class HierarchicalClustering(Clustering):
@@ -160,8 +175,142 @@ class HierarchicalClustering(Clustering):
     Methods for Hierarchical Clustering
     """
 
-    def __fit__(self):
-        print(self.distvec)
+    def _labels(self):
+        """
+        initially populates cluster <--> ligand mappings
+        """
+        return np.arange(len(self.ligands))
+
+    def _linkage_matrix(self):
+        """
+        a linkage matrix specified by scipy linkage matrix format
+
+        2D matrix (n-1, 4):
+            [cls_i, cls_j, dist, # original observations in new cluster]
+        """
+        n = len(self.ligands)
+        return np.zeros((n-1, 4))
+
+    def _update_clusters(self, x, y, verbose=False):
+        """
+        merges cluster X and cluster Y into a single cluster of label z
+        """
+
+        z = self.num_clusters
+        self.num_clusters += 1
+
+        if verbose:
+            print("Merging {} & {} -> {}".format(x, y, z))
+
+        label_indices = np.where((self.labels == x) | (self.labels == y))[0]
+        self.labels[label_indices] = z
+
+    def _update_linkage(self, x, y, dist, iter):
+        """
+        update linkage matrix
+        """
+        num_orig = np.where(self.labels == x)[0].size + \
+            np.where(self.labels == y)[0].size
+
+        self.zmat[iter] = np.array([int(x), int(y), dist, int(num_orig)])
+
+    def _linkage_single(self, c1, c2):
+        """
+        implements single linkage
+
+        minimum distance between points in clusters
+        """
+        x = np.where(self.labels == c1)[0]
+        y = np.where(self.labels == c2)[0]
+
+        minimum_distance = 1
+        for i in x:
+            for j in y:
+                dist = self._get_distance(i, j)
+                if dist <= minimum_distance:
+                    minimum_distance = dist
+
+        return minimum_distance
+
+    def _linkage_complete(self, c1, c2):
+        """
+        implements complete linkage
+
+        maximum distance between points in clusters
+        """
+        pass
+
+    def _linkage_average(self, c1, c2):
+        """
+        implements average linkage
+
+        average distance between points in clusters
+        """
+
+    def _linkage(self, *args):
+
+        if self.linkage == "single":
+            return self._linkage_single(*args)
+        elif self.linkage == "complete":
+            return self._linkage_complete(*args)
+        elif self.linkage == "average":
+            return self._linkage_average(*args)
+        else:
+            print("Unknown linkage metric : {}".format(self.linkage))
+            sys.exit(-1)
+        pass
+
+    def _minimum_distance(self, verbose=False):
+
+        unique_clusters = np.unique(self.labels)
+
+        min_dist = 1
+        min_pair = None
+        for idx, c1 in enumerate(unique_clusters):
+
+            for jdx, c2 in enumerate(unique_clusters):
+
+                if jdx <= idx:
+                    continue
+
+                dist = self._linkage(c1, c2)
+
+                if dist <= min_dist:
+                    min_dist = dist
+                    min_pair = (c1, c2)
+
+        if verbose:
+            print(min_dist, min_pair)
+
+        x, y = min_pair
+        return x, y, min_dist
+
+    def __fit__(self, linkage="single", verbose=False):
+
+        # defines linkage method
+        self.linkage = linkage
+
+        # initializes linkage matrix
+        self.zmat = self._linkage_matrix()
+
+        # populates initial labels
+        self.labels = self._labels()
+
+        # tracks number of unique cluster labels
+        self.num_clusters = self.labels.size
+
+        for iter in np.arange(self.zmat.shape[0]):
+
+            # find minimal distance
+            x, y, dist = self._minimum_distance(verbose=verbose)
+
+            # update linkage matrix
+            self._update_linkage(x, y, dist, iter)
+
+            # merge clusters of minimal pairs
+            self._update_clusters(x, y, verbose=verbose)
+
+        return self.zmat
 
 
 class PartitionClustering(Clustering):
@@ -194,7 +343,7 @@ class simCluster():
 def main():
     ligand_obj = Ligand("../data/test_set.csv")
     hcl = HierarchicalClustering(ligand_obj)
-    hcl.fit()
+    hcl.fit(verbose=True)
 
     pass
 
