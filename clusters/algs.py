@@ -162,8 +162,10 @@ class Clustering():
         """
         finds distance between ligand index <idx> and ligand index <jdx>
         """
-        tup = tuple(sorted((idx, jdx)))
-        return self.distvec[self.index_tup_vec[tup]]
+        if idx < jdx:
+            return self.distvec[self.index_tup_vec[(idx, jdx)]]
+        else:
+            return self.distvec[self.index_tup_vec[(jdx, idx)]]
 
     def _pairwise_iter(self, arr):
         """
