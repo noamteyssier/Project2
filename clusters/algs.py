@@ -372,8 +372,8 @@ class simCluster():
 
 def main():
     ligand_obj = Ligand("../data/test_set.csv")
-    hcl = HierarchicalClustering(ligand_obj, linkage='average')
-    hcl.fit(verbose=True)
+    hcl = HierarchicalClustering(ligand_obj)
+    hcl.fit(verbose=True, linkage="single")
 
     pass
 
