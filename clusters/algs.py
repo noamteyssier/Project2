@@ -346,9 +346,6 @@ class HierarchicalClustering(Clustering):
         # main loop
         for iter in np.arange(self.zmat.shape[0]):
 
-            # find cluster members
-            self.cluster_members = self._cluster_members()
-
             # find minimal distance
             x, y, dist = self._minimum_distance(verbose=verbose)
 
