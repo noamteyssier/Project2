@@ -122,6 +122,9 @@ class Clustering():
         self.index_tup_vec = dict()
         self.index_vec_tup = dict()
 
+        # initialize empty labels array
+        self.labels = np.array([])
+
         self._build_distmat()
 
     def jaccard(self, x, y):
@@ -384,21 +387,6 @@ class PartitionClustering(Clustering):
     Methods for K-Means Partition Clustering
     """
 
-    def _centroid(self):
-        """
-        initializes a centroid in bitspace
-
-        will initialize the mean number of activations seen in data randomly
-        """
-
-        return set(
-            np.random.randint(
-                low=0,
-                high=self.ligands.bitspace,
-                size=int(self.ligands.mean)
-                )
-            )
-
     def _member_activations(self, members):
         """
         yield all activations found in a cluster
@@ -406,6 +394,18 @@ class PartitionClustering(Clustering):
         for m in members:
             for activation in self.ligands.sparse[m]:
                 yield activation
+
+    def _mean_member_activations(self, members):
+        """
+        calculate the mean number of activations across members
+        """
+        activations = np.array([
+            len(self.ligands.sparse[m]) for m in members
+        ])
+        if activations.size == 0:
+            return 1
+        else:
+            return activations.mean()
 
     def _get_activation_frequencies(self, members):
         """
@@ -424,27 +424,35 @@ class PartitionClustering(Clustering):
         activations, counts = np.unique(all_activations, return_counts=True)
 
         # assign frequency position (missing activations stay zero)
-        frequencies[activations] = counts
+        try:
+            frequencies[activations] = counts
+        except IndexError:
+            frequencies[np.random.choice(frequencies.size)] = 1
 
         # convert to probability
         frequencies = frequencies / frequencies.sum()
 
         return frequencies
 
-    def _weighted_centroid(self, p):
+    def _weighted_centroid(self, n, p):
         """
         creates a new centroid with a given multinomial parameterization
         """
-        mn = np.random.multinomial(self.ligands.bitspace, p)
+        mn = np.random.multinomial(n, p)
         return set(np.flatnonzero(mn))
 
     def _initialize_centroids(self):
         """
-        initializes <k> centroids
+        initializes <k> centroids as <k> random points in space (k++ method)
         """
-        return [
-            (c, self._centroid()) for c in range(self.k)
-        ]
+        centroids = []
+        for i in range(self.k):
+            random_point = self.ligands.sparse[
+                np.random.choice(len(self.ligands) + 1)
+                ]
+            centroids.append((i, random_point))
+
+        return centroids
 
     def _assign_centroids(self):
         """
@@ -496,29 +504,47 @@ class PartitionClustering(Clustering):
             # retrieve members of a cluster
             members = self._get_cluster_members(k)
 
+            # calculate mean activations across members
+            mean_activations = self._mean_member_activations(members)
+
             # calculate activation frequencies
             frequencies = self._get_activation_frequencies(members)
 
             # build centroid with multinomial derived activations
-            centroid = self._weighted_centroid(frequencies)
+            centroid = self._weighted_centroid(mean_activations, frequencies)
 
-            print(len(centroid))
+            self.centroids[k] = (k, centroid)
 
-            break
-        pass
+    def __fit__(self, k, seed=42, max_iter=200):
+        """
+        implements k-means clustering
 
-    def __fit__(self, k, seed=42, epsilon=1e-2):
+        will return the minimum score and cluster labels at that score
+        """
         np.random.seed(seed)
         self.k = k
+
         self.centroids = self._initialize_centroids()
         self.labels = np.zeros(len(self.ligands), dtype=int)
 
-        while True:
+        iter = 0
+
+        self.current_min = 0
+        self.current_labels = self.labels.copy()
+        while iter < max_iter:
 
             self._assign_centroids()
-            self._evaluate_clusters()
+            total_distances = self._evaluate_clusters()
+
+            if (total_distances < self.current_min) | (iter == 0):
+                self.current_min = total_distances
+                self.current_labels = self.labels.copy()
+
             self._update_centroids()
-            break
+
+            iter += 1
+
+        return self.current_min, self.current_labels
 
 
 class qCluster():
@@ -545,9 +571,7 @@ def main():
     # hcl.fit(verbose=True, linkage="single")
 
     pcl = PartitionClustering(ligand_obj)
-    pcl.fit(k=5)
-
-    pass
+    score, labels = pcl.fit(k=50)
 
 
 if __name__ == '__main__':
