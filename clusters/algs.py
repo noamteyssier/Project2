@@ -384,6 +384,28 @@ class HierarchicalClustering(Clustering):
             int(x), int(y), dist, int(num_orig)
         ])
 
+    def update_clusters(self, pair):
+        """
+        merges cluster X and cluster Y into a single cluster of label z
+        """
+
+        # split pair into labels
+        x, y = pair
+
+        # name of new label
+        z = self.num_clusters
+
+        # increment number of labels
+        self.num_clusters += 1
+
+        # select for all indices of x or y
+        label_indices = np.flatnonzero(
+            (self.labels == x) | (self.labels == y)
+        )
+
+        # update merged labels to reflect new cluster label
+        self.labels[label_indices] = z
+
     def __fit__(self, linkage='single'):
 
         # define linkage method
@@ -413,7 +435,7 @@ class HierarchicalClustering(Clustering):
             self.update_linkage_matrix(pair, dist, iter)
 
             # merge clusters of minimap pairs
-            self.update_clusters(x, y)
+            self.update_clusters(pair)
             break
 
         # return linkage matrix
