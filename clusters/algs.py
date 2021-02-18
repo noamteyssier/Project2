@@ -342,15 +342,19 @@ class HierarchicalClustering(Clustering):
         unique_clusters = np.unique(self.labels)
 
         # initialize variables
-        min_dist = 1
+        min_dist = 0
         min_pair = None
 
         # iterate through unique pairs of labels
+        iter = 0
         for i, j in self.pairwise_iter(unique_clusters):
 
+            label_i = unique_clusters[i]
+            label_j = unique_clusters[j]
+
             # find indices of cluster members
-            m1 = np.flatnonzero(self.labels == i)
-            m2 = np.flatnonzero(self.labels == j)
+            m1 = np.flatnonzero(self.labels == label_i)
+            m2 = np.flatnonzero(self.labels == label_j)
 
             # build interaction of indices
             indices = np.ix_(m1, m2)
@@ -362,9 +366,11 @@ class HierarchicalClustering(Clustering):
             linkage_distance = self.linkage_method(all_distances)
 
             # accept linkage as new minima or continue
-            if linkage_distance < min_dist:
+            if (linkage_distance <= min_dist) | (iter == 0):
                 min_dist = linkage_distance
-                min_pair = (i, j)
+                min_pair = (label_i, label_j)
+
+            iter += 1
 
         return min_pair, min_dist
 
@@ -426,7 +432,7 @@ class HierarchicalClustering(Clustering):
         self.num_clusters = self.labels.size
 
         # main loop
-        for iter in np.arange(self.ligands.size):
+        for iter in np.arange(self.zmat.shape[0]):
 
             # find minimal distance
             pair, dist = self.minimal_distance()
@@ -436,11 +442,9 @@ class HierarchicalClustering(Clustering):
 
             # merge clusters of minimap pairs
             self.update_clusters(pair)
-            break
 
         # return linkage matrix
-
-        pass
+        return self.zmat
 
 
 def main():
@@ -451,8 +455,9 @@ def main():
     hclust = HierarchicalClustering(ligands, metric='euclidean')
     # hclust.pairwise_distance(save=True)
     hclust.load_dist("temp.npy")
-    hclust.fit()
+    zmat = hclust.fit()
 
+    pd.DataFrame(zmat).to_csv("zmat.csv")
 
 if __name__ == '__main__':
     main()
