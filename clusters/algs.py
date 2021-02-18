@@ -303,12 +303,104 @@ class PartitionClustering(Clustering):
         return self.labels
 
 
+class HierarchicalClustering(Clustering):
+
+    def linkage_single(self, d):
+        return d.min()
+
+    def linkage_complete(self, d):
+        return d.max()
+
+    def linkage_average(self, d):
+        return d.mean()
+
+    def linkage(self, m1, m2):
+        """
+        calculates appropriate linkage for cluster members
+        """
+        dist_arr = np.zeros(m1.shape[0] * m2.shape[0])
+
+        idx = 0
+        for i, j in self.combinations(m1, m2):
+            dist_arr[idx] = self.euclidean(m1, m2)
+            idx += 1
+
+        return self.linkage_method(dist_arr)
+
+    def init_linkage_matrix(self):
+        """
+        a linkage matrix specified by scipy linkage matrix format
+
+        2D matrix (n-1, 4):
+            [cls_i, cls_j, dist, # original observations in new cluster]
+        """
+        return np.zeros(
+            (self.ligands.size-1, 4)
+            )
+
+    def init_labels(self):
+        """
+        initializes unique label for each observation
+        """
+
+        return np.arange(self.ligands.size)
+
+    def minimal_distance(self):
+        unique_clusters = np.unique(self.labels)
+
+        
+        for i, j in self.pairwise_iter(unique_clusters):
+            distance = self.linkage(
+                self.distmat[self.labels == i],
+                self.distmat[self.labels == j]
+            )
+            print(distance)
+
+            break
+    def __fit__(self, linkage='single'):
+
+        # define linkage method
+        self.linkages = {
+            "single": self.linkage_single,
+            "complete": self.linkage_complete,
+            "average": self.linkage_average
+        }
+        self.linkage_method = self.linkages[linkage]
+
+        # initialize linkage matrix
+        self.zmat = self.init_linkage_matrix()
+
+        # populate initial labels
+        self.labels = self.init_labels()
+
+        # track number of unique cluster labels (will increase with mergers)
+        self.num_clusters = self.labels.size
+
+        # main loop
+        for iter in np.arange(self.ligands.size):
+
+            # find minimal distance
+            self.minimal_distance()
+
+            # update linkage matrix
+
+            # merge clusters of minimap pairs
+
+            break
+
+        # return linkage matrix
+
+        pass
+
+
 def main():
     ligands = Ligand("../data/subset.csv")
-    kmeans = PartitionClustering(ligands, metric='euclidean')
+    # kmeans = PartitionClustering(ligands, metric='euclidean')
     # kmeans.pairwise_distance(save=True)
-    kmeans.load_dist("subset_dist.npy")
-    kmeans.fit(k=10)
+
+    hclust = HierarchicalClustering(ligands, metric='euclidean')
+    hclust.load_dist("subset_dist.npy")
+    hclust.fit()
 
 
 if __name__ == '__main__':
