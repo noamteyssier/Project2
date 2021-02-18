@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
 from multiprocessing import Pool
-from tqdm import tqdm
-import sys
 
 
 class Ligand():
@@ -458,6 +456,7 @@ def main():
     zmat = hclust.fit()
 
     pd.DataFrame(zmat).to_csv("zmat.csv")
+
 
 if __name__ == '__main__':
     main()
