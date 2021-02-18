@@ -600,7 +600,7 @@ class Ligand():
         M: Bitvector Feature Length
         """
         self.sparse = dok_matrix(
-            (len(self), self.bitspace), dtype=np.bool
+            (len(self), self.bitspace), dtype=np.int8
         )
 
     def iter_bits(self, onbits):
@@ -625,20 +625,37 @@ class Ligand():
         """
         return self.sparse[index].nonzero()[1]
 
+    def get_dense(self, index):
+        """
+        returns dense array of activations for a given molecule
+        """
+        return self.sparse[index].toarray().ravel()
+
+    def iter_dense(self):
+        for idx in self:
+            yield self.get_dense(idx)
+
     def __len__(self):
         """
         returns number of molecules in ligand dataset
         """
         return self.frame.shape[0]
 
+    def __iter__(self):
+        for idx in np.arange(self.size):
+            yield idx
+
 class Clustering():
 
-    def __init__(self, ligands, metric='jaccard'):
+    def __init__(self, ligands, metric='jaccard', seed=42):
+        np.random.seed(seed)
+
         self.ligands = ligands
         self.metric = metric
 
         self.call_metric = {
-            "jaccard": self.jaccard
+            "jaccard": self.jaccard,
+            "euclidean": self.euclidean
         }
 
     def jaccard(self, x, y):
@@ -651,12 +668,34 @@ class Clustering():
 
         return 1 - (ix / un)
 
+    def euclidean(self, x, y):
+        """
+        calculates euclidean distance between two arrays
+        """
+
+        distance = np.sqrt(
+            ((y - x)**2).sum()
+        )
+
+        return distance
+
     def distance(self, *args):
         """
         calls given distance metric
         """
 
         return self.call_metric[self.metric](*args)
+
+    def dense_distance(self, indices):
+        """
+        maps given indices to dense array from ligands' sparse matrix
+        """
+
+        idx, jdx = indices
+        return self.distance(
+            self.ligands.get_dense(idx),
+            self.ligands.get_dense(jdx)
+        )
 
     def sparse_distance(self, indices):
         """
@@ -679,34 +718,89 @@ class Clustering():
                 if jdx > idx:
                     yield (idx, jdx)
 
-    def pairwise_distance(self):
+    def pairwise_distance(self, save=False):
         """
         calculates pairwise distances over all pairs of molecules
         """
 
         p = Pool()
         condensed_distance_matrix = p.map(
-            self.sparse_distance,
+            self.dense_distance,
             self.pairwise_iter(self.ligands)
             )
         p.close()
 
         self.distmat = squareform(condensed_distance_matrix)
 
-    def fit(self, *args):
-        return self.fit(*args)
+        if save:
+            np.save("temp.npy", self.distmat)
+
+    def combinations(self, iter_i, iter_j):
+        for i in iter_i:
+            for j in iter_j:
+                yield (i, j)
+
+    def load_dist(self, fn):
+        self.distmat = np.load(fn)
+
+    def fit(self, *args, **kwargs):
+        return self.__fit__(*args, **kwargs)
 
 class PartitionClustering(Clustering):
 
-    def __fit__():
+    def initialize_centroids(self):
+        """
+        initialize <k> centroids as <k> random observations from dataset
+        """
 
-        
+        centroids = self.distmat[
+            np.random.choice(self.ligands.size, size=self.k)
+        ]
+        return centroids
+
+    def assign_centroids(self):
+        """
+        combinatorial distance between centroids and molecules
+        """
+
+        print("START HERE")
+        sys.exit()
+        distances = np.array(
+            list(map(
+                lambda x : self.euclidean(x[0], x[1]),
+                self.combinations(
+                    self.centroids, self.distmat
+                )
+            ))
+        )
+
+
+        print(distances)
+
+
+
+
+    def __fit__(self, k, max_iter=300):
+        self.k = k
+        self.centroids = self.initialize_centroids()
+        self.labels = np.zeros(self.ligands.size, dtype=np.int32)
+
+        iter=0
+        while iter < max_iter:
+
+            self.assign_centroids()
+
+            iter += 1
+            break
+
 
 def main():
     ligands = Ligand("../data/test_set.csv")
-    cl = Clustering(ligands)
+    kmeans = PartitionClustering(ligands, metric='euclidean')
+    # kmeans.pairwise_distance(save=True)
+    kmeans.load_dist("temp.npy")
 
-    cl.pairwise_distance()
+    kmeans.fit(k=3)
 
 if __name__ == '__main__':
     main()
