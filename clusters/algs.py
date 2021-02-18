@@ -314,19 +314,6 @@ class HierarchicalClustering(Clustering):
     def linkage_average(self, d):
         return d.mean()
 
-    def linkage(self, m1, m2):
-        """
-        calculates appropriate linkage for cluster members
-        """
-        dist_arr = np.zeros(m1.shape[0] * m2.shape[0])
-
-        idx = 0
-        for i, j in self.combinations(m1, m2):
-            dist_arr[idx] = self.euclidean(m1, m2)
-            idx += 1
-
-        return self.linkage_method(dist_arr)
-
     def init_linkage_matrix(self):
         """
         a linkage matrix specified by scipy linkage matrix format
@@ -346,17 +333,41 @@ class HierarchicalClustering(Clustering):
         return np.arange(self.ligands.size)
 
     def minimal_distance(self):
+        """
+        finds the minimal distance between all clusters and
+        returns pair and distance
+        """
+
+        # find all unique cluster labels
         unique_clusters = np.unique(self.labels)
 
-        
-        for i, j in self.pairwise_iter(unique_clusters):
-            distance = self.linkage(
-                self.distmat[self.labels == i],
-                self.distmat[self.labels == j]
-            )
-            print(distance)
+        # initialize variables
+        min_dist = 1
+        min_pair = None
 
-            break
+        # iterate through unique pairs of labels
+        for i, j in self.pairwise_iter(unique_clusters):
+
+            # find indices of cluster members
+            m1 = np.flatnonzero(self.labels == i)
+            m2 = np.flatnonzero(self.labels == j)
+
+            # build interaction of indices
+            indices = np.ix_(m1, m2)
+
+            # subset distance matrix to reflect interaction of indices
+            all_distances = self.distmat[indices].ravel()
+
+            # calculate linkage distance
+            linkage_distance = self.linkage_method(all_distances)
+
+            # accept linkage as new minima or continue
+            if linkage_distance < min_dist:
+                min_dist = linkage_distance
+                min_pair = (i, j)
+
+        return min_pair, min_dist
+
     def __fit__(self, linkage='single'):
 
         # define linkage method
@@ -380,7 +391,7 @@ class HierarchicalClustering(Clustering):
         for iter in np.arange(self.ligands.size):
 
             # find minimal distance
-            self.minimal_distance()
+            pair, dist = self.minimal_distance()
 
             # update linkage matrix
 
@@ -394,12 +405,13 @@ class HierarchicalClustering(Clustering):
 
 
 def main():
-    ligands = Ligand("../data/subset.csv")
+    ligands = Ligand("../data/test_set.csv")
     # kmeans = PartitionClustering(ligands, metric='euclidean')
     # kmeans.pairwise_distance(save=True)
 
     hclust = HierarchicalClustering(ligands, metric='euclidean')
-    hclust.load_dist("subset_dist.npy")
+    # hclust.pairwise_distance(save=True)
+    hclust.load_dist("temp.npy")
     hclust.fit()
 
 
