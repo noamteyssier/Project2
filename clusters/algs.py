@@ -368,6 +368,22 @@ class HierarchicalClustering(Clustering):
 
         return min_pair, min_dist
 
+    def update_linkage_matrix(self, pair, dist, iter):
+        """
+        updates linkage matrix of incoming merge
+        """
+
+        # splits pair into labels
+        x, y = pair
+
+        # calculates number of nodes in new merger
+        num_orig = (self.labels == x).sum() + (self.labels == y).sum()
+
+        # updates linkage with merge
+        self.zmat[iter] = np.array([
+            int(x), int(y), dist, int(num_orig)
+        ])
+
     def __fit__(self, linkage='single'):
 
         # define linkage method
@@ -394,9 +410,10 @@ class HierarchicalClustering(Clustering):
             pair, dist = self.minimal_distance()
 
             # update linkage matrix
+            self.update_linkage_matrix(pair, dist, iter)
 
             # merge clusters of minimap pairs
-
+            self.update_clusters(x, y)
             break
 
         # return linkage matrix
