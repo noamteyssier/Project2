@@ -2,9 +2,9 @@
 
 import numpy as np
 import pandas as pd
-from scipy.sparse import dok_matrix
 from scipy.spatial.distance import squareform
 from multiprocessing import Pool
+from tqdm import tqdm
 import sys
 
 
@@ -15,7 +15,7 @@ class Ligand():
         self.bitspace = bitspace
 
         self.load_csv()
-        self.build_sparsemat()
+        self.load_mat()
         self.size = len(self)
 
     def load_csv(self):
@@ -24,24 +24,32 @@ class Ligand():
         """
         self.frame = pd.read_csv(self.fn)
 
-    def build_sparsemat(self):
+    def load_mat(self):
         """
         handles creation of sparse matrix
         """
 
-        self.init_sparsemat()
-        self.populate_sparsemat()
+        self.init_mat()
+        self.populate_mat()
 
-    def init_sparsemat(self):
+    def init_mat(self):
         """
         instantiates sparse matrix of shape (N,M)
 
         N: Number of Molecules
         M: Bitvector Feature Length
         """
-        self.sparse = dok_matrix(
+        self.mat = np.zeros(
             (len(self), self.bitspace), dtype=np.int8
         )
+
+    def populate_mat(self):
+        """
+        sets activations for each molecule by iterating through onbits
+        """
+        for idx, onbits in enumerate(self.frame.OnBits):
+            for jdx in self.iter_bits(onbits):
+                self.mat[idx, jdx] = True
 
     def iter_bits(self, onbits):
         """
@@ -51,25 +59,17 @@ class Ligand():
         for b in onbits.strip().split(","):
             yield int(b)
 
-    def populate_sparsemat(self):
-        """
-        sets activations for each molecule by iterating through onbits
-        """
-        for idx, onbits in enumerate(self.frame.OnBits):
-            for jdx in self.iter_bits(onbits):
-                self.sparse[idx, jdx] = 1
-
     def get_activations(self, index):
         """
         returns activations for a given molecule
         """
-        return self.sparse[index].nonzero()[1]
+        return np.flatnonzero(self.mat[index])
 
     def get_dense(self, index):
         """
         returns dense array of activations for a given molecule
         """
-        return self.sparse[index].toarray().ravel()
+        return self.mat[index]
 
     def iter_dense(self):
         for idx in self:
@@ -165,16 +165,16 @@ class Clustering():
         """
 
         p = Pool()
-        condensed_distance_matrix = p.map(
+        cdist = p.map(
             self.dense_distance,
             self.pairwise_iter(self.ligands)
-            )
+        )
         p.close()
 
-        self.distmat = squareform(condensed_distance_matrix)
+        self.distmat = squareform(cdist)
 
         if save:
-            np.save("temp.npy", self.distmat)
+            np.save("subset_dist.npy", self.distmat)
 
     def combinations(self, iter_i, iter_j):
         for i in iter_i:
@@ -240,32 +240,61 @@ class PartitionClustering(Clustering):
         )
 
         # reshape distances to reflect (NxK)
-        distances = distances.reshape((self.ligands.size, self.k))
+        self.distances = distances.reshape((self.ligands.size, self.k))
 
         # return indices of lowest distances
-        return self.argmin(distances)
+        return self.argmin(self.distances)
 
-    def __fit__(self, k, max_iter=300):
+    def update_clusters(self):
+        """
+        update clusters with membership
+        """
+
+        distances = np.zeros(self.k)
+        updated_centroids = self.centroids.copy()
+
+        for k in np.arange(self.k):
+
+            updated_centroids[k] = self.distmat[self.labels == k].mean(axis=0)
+
+            distances[k] = self.euclidean(
+                self.centroids[k],
+                updated_centroids[k]
+                )
+
+        global_distance = distances.sum()
+        return global_distance, updated_centroids
+
+    def __fit__(self, k, max_iter=3000):
         self.k = k
         self.centroids = self.initialize_centroids()
-        self.labels = np.zeros(self.ligands.size, dtype=np.int32)
 
+        self.current_distance = 0
         iter = 0
+
         while iter < max_iter:
 
-            self.assign_centroids()
+            self.labels = self.assign_centroids()
+            distance, updated_centroids = self.update_clusters()
+
+            if (iter == 0) | (distance < self.current_distance):
+                self.current_distance = distance
+                self.centroids = updated_centroids.copy()
+
+            else:
+                break
 
             iter += 1
-            break
+
+        return self.labels
 
 
 def main():
-    ligands = Ligand("../data/test_set.csv")
+    ligands = Ligand("../data/subset.csv")
     kmeans = PartitionClustering(ligands, metric='euclidean')
     # kmeans.pairwise_distance(save=True)
-    kmeans.load_dist("temp.npy")
-
-    kmeans.fit(k=3)
+    kmeans.load_dist("subset_dist.npy")
+    kmeans.fit(k=10)
 
 
 if __name__ == '__main__':
