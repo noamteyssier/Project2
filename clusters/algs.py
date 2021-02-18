@@ -203,7 +203,6 @@ class Clustering():
 
         return argmins
 
-
     def load_dist(self, fn):
         self.distmat = np.load(fn)
 
@@ -228,17 +227,23 @@ class PartitionClustering(Clustering):
         combinatorial distance between centroids and molecules
         """
 
+        # calculate distances of observations and centroids
         distances = np.array(
-            list(map(
-                lambda x: self.euclidean(x[0], x[1]),
-                self.combinations(
-                    self.centroids, self.distmat
+            list(
+                map(
+                    lambda x: self.euclidean(x[0], x[1]),
+                    self.combinations(
+                        self.centroids, self.distmat
+                    )
                 )
-            ))
+            )
         )
 
+        # reshape distances to reflect (NxK)
         distances = distances.reshape((self.ligands.size, self.k))
-        self.argmin(distances)
+
+        # return indices of lowest distances
+        return self.argmin(distances)
 
     def __fit__(self, k, max_iter=300):
         self.k = k
