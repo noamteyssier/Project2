@@ -265,22 +265,36 @@ class PartitionClustering(Clustering):
         global_distance = distances.sum()
         return global_distance, updated_centroids
 
-    def __fit__(self, k, max_iter=3000):
+    def __fit__(self, k, max_iter=100):
         self.k = k
         self.centroids = self.initialize_centroids()
 
         self.current_distance = 0
         iter = 0
 
-        while iter < max_iter:
+        while True:
 
+            # assign each observation to centroids
             self.labels = self.assign_centroids()
+
+            # calculate global distance and calculate new centroids
             distance, updated_centroids = self.update_clusters()
 
+            # check for distance minimization
             if (iter == 0) | (distance < self.current_distance):
+
+                # set new minima
                 self.current_distance = distance
+
+                # set new centroids
                 self.centroids = updated_centroids.copy()
 
+            # quit if still haven't converged after max iterations
+            elif iter == max_iter:
+                print("No Convergence, Breaking at {}".format(iter))
+                break
+
+            # quit if distance calculation increases
             else:
                 break
 
