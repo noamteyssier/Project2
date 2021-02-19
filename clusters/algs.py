@@ -447,91 +447,90 @@ class Silhouette():
         self.labels = labels
         self.unique_labels = np.unique(labels)
 
-    def subset_dist(self, idx, jdx):
-        """
-        subset the distance matrix to the joint indices
-        of two index arrays
-        """
-        indices = np.ix_(idx, jdx)
-        return self.distmat[indices]
-
-    def cohesion(self):
+    def cohesion(self, idx):
         """
         calculate cohesion coefficient
         (i.e. mean within-cluster distances)
         """
 
-        # initialize distance array
-        cohesions = np.zeros(self.unique_labels.size)
+        # identify neighbors
+        cluster_members = np.flatnonzero(self.labels == self.labels[idx])
 
-        # iterate through labels
-        for i, u in enumerate(self.unique_labels):
+        # remove self from list of indices
+        cluster_members = cluster_members[cluster_members != idx]
 
-            # identify indices of label
-            arr_i = np.flatnonzero(self.labels == u)
+        # extract within cluster distances
+        distances = self.distmat[idx, cluster_members]
 
-            # subset distance matrix to indices
-            sub_dist = self.subset_dist(arr_i, arr_i)
+        # return mean
+        return distances.mean()
 
-            # take mean distance of subset distance matrix
-            cohesions[i] = sub_dist.mean()
-
-        return cohesions.sum()
-
-    def separation(self):
+    def separation(self, idx):
         """
         calculate separation coefficient
         (i.e. minimum mean between-cluster distance)
         """
 
-        # initialize distance array
-        separations = np.zeros(self.unique_labels.size)
+        # identify observations cluster label
+        idx_label = self.labels[idx]
 
-        # iterate through labels
-        for i, u in enumerate(self.unique_labels):
+        # identify all other cluster labels
+        non_idx_labels = self.unique_labels[self.unique_labels != idx_label]
 
-            current_min = np.inf
+        # initialize empty mean cluster distance array
+        cluster_distances = np.zeros(non_idx_labels.size)
 
-            for v in self.unique_labels:
+        # iterate through unique cluster labels
+        for i, u in enumerate(non_idx_labels):
 
-                if u == v:
-                    continue
+            # identify cluster members of other cluster
+            cluster_members = np.flatnonzero(self.labels == u)
 
-                arr_i = np.flatnonzero(self.labels == u)
-                arr_j = np.flatnonzero(self.labels == v)
+            # extract all distances of observation to all other cluster members
+            all_distances = self.distmat[idx, cluster_members]
 
-                sub_dist = self.subset_dist(arr_i, arr_j)
-                distance = sub_dist.mean()
+            # take the mean of all distances
+            cluster_distances[i] = all_distances.mean()
 
-                if distance < current_min:
-                    current_min = distance
-
-            separations[i] = current_min
-
-        return separations.sum()
-
-    def score(self, alpha, beta):
-        score = (beta - alpha) / np.max([alpha, beta])
-        return score
+        # return minimum inter-cluster distance
+        return cluster_distances.min()
 
     def fit(self):
-        alpha = self.cohesion()
-        beta = self.separation()
+        """
+        calculates silhouette scores for each observation
+        """
 
-        print(alpha, beta)
-        return self.score(alpha, beta)
+        # initialize silhouette score array
+        s_i = np.zeros(self.labels.size)
+
+        # iterate through observations
+        for idx in np.arange(self.labels.size):
+
+            # calculate cohesion
+            cohesion = self.cohesion(idx)
+
+            # calculate separation
+            separation = self.separation(idx)
+
+            # calculate silhouette score
+            s_i[idx] = (separation - cohesion) / np.max([cohesion, separation])
+
+        # return silhouettes
+        return s_i
+
 
 def main():
     ligands = Ligand("../data/test_set.csv")
     kmeans = PartitionClustering(ligands, metric='euclidean')
     kmeans.load_dist("temp.npy")
 
-    labels = kmeans.fit(k=6)
+    labels = kmeans.fit(k=100)
     distmat = kmeans.get_distance_matrix()
 
     sil = Silhouette(distmat, labels)
-    score = sil.fit()
-    print(score)
+    silhouettes = sil.fit()
+
+    print(silhouettes.mean())
 
     # kmeans.pairwise_distance(save=True)
 
