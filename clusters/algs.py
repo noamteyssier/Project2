@@ -209,7 +209,7 @@ class PartitionClustering(Clustering):
             for i in np.arange(len(self._k_indices)):
 
                 # calculate distances of all points to that centroid
-                distances[:,i] = self.paired_distance(
+                distances[:, i] = self.paired_distance(
                     self.data[self._k_indices[i]],
                     self.data[np.arange(self.n)]
                 ) ** 2
