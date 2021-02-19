@@ -2,10 +2,48 @@
 
 import numpy as np
 import pandas as pd
+import numba as nb
 from scipy.spatial.distance import squareform
 from multiprocessing import Pool
 import sys
 
+
+@nb.jit(nopython=True, fastmath=True)
+def euclidean(x, y):
+    return np.sqrt(
+        np.sum((y-x)**2)
+        )
+
+
+@nb.jit(nopython=True)
+def jaccard(x, y):
+    ix = np.sum(x & y)
+    un = np.sum(x | y)
+    return ix / un
+
+
+@nb.jit(nopython=True)
+def PairwiseIter(n):
+    """
+    iterates through pairwise indices over range N
+    """
+    for i in np.arange(n):
+        for j in np.arange(i, n):
+            if j > i:
+                yield (i, j)
+
+
+@nb.jit(nopython=True)
+def PairwiseDistance(m):
+    distances = np.zeros(
+        int((m.shape[0] * (m.shape[0] - 1)) / 2)
+    )
+    iter = 0
+    for (i, j) in PairwiseIter(m.shape[0]):
+        distances[iter] = jaccard(m[i], m[j])
+        iter += 1
+
+    return distances
 
 class Ligand():
 
@@ -73,6 +111,13 @@ class Ligand():
     def iter_dense(self):
         for idx in self:
             yield self.get_dense(idx)
+
+    def pdist(self):
+        """
+        calculate pairwise distances within a matrix
+        """
+        self.distmat = PairwiseDistance(self.mat)
+        return self.distmat
 
     def __len__(self):
         """
@@ -226,8 +271,8 @@ class PartitionClustering(Clustering):
                 )
             self._chosen_indices.append(centroid_idx)
 
-            # select all distances to centroid
-            squared_distances = self.distmat[:, centroid_idx] ** 3
+            # extract all distances to centroid
+            squared_distances = self.distmat[:, centroid_idx]
 
             # zero out already chosen centroids
             squared_distances[self._chosen_indices] = 0
@@ -585,12 +630,17 @@ class Silhouette():
 
 def main():
     ligands = Ligand("../data/test_set.csv")
-    kmeans = PartitionClustering(ligands, metric='euclidean', seed=42)
-    kmeans.pairwise_distance(save=True)
-    kmeans.load_dist("temp.npy")
+    # distmat = ligands.pdist()
+    # np.save("test_set.npy", distmat)
+    distmat = np.load("test_set.npy")
 
-    labels = kmeans.fit(k=2)
-    print(labels)
+
+    kmeans = PartitionClustering(ligands, metric='euclidean', seed=42)
+    # kmeans.pairwise_distance(save=True)
+    # kmeans.load_dist("temp.npy")
+
+    # labels = kmeans.fit(k=2)
+    # print(labels)
     # distmat = kmeans.get_distance_matrix()
 
     # sil = Silhouette(distmat, labels)
