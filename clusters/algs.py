@@ -136,17 +136,6 @@ class Clustering():
             self.ligands.get_dense(jdx)
         )
 
-    def sparse_distance(self, indices):
-        """
-        maps given indices to onbits from ligands' sparse matrix
-        """
-
-        idx, jdx = indices
-        return self.distance(
-            self.ligands.get_activations(idx),
-            self.ligands.get_activations(jdx)
-        )
-
     def pairwise_iter(self, arr):
         """
         iterates through pairs of indices in unique pairwise manner
@@ -206,6 +195,12 @@ class Clustering():
 
     def fit(self, *args, **kwargs):
         return self.__fit__(*args, **kwargs)
+
+    def get_distance_matrix(self):
+        """
+        returns distance matrix
+        """
+        return self.distmat
 
 
 class PartitionClustering(Clustering):
@@ -445,17 +440,107 @@ class HierarchicalClustering(Clustering):
         return self.zmat
 
 
+class Silhouette():
+
+    def __init__(self, distmat, labels):
+        self.distmat = distmat
+        self.labels = labels
+        self.unique_labels = np.unique(labels)
+
+    def subset_dist(self, idx, jdx):
+        """
+        subset the distance matrix to the joint indices
+        of two index arrays
+        """
+        indices = np.ix_(idx, jdx)
+        return self.distmat[indices]
+
+    def cohesion(self):
+        """
+        calculate cohesion coefficient
+        (i.e. mean within-cluster distances)
+        """
+
+        # initialize distance array
+        cohesions = np.zeros(self.unique_labels.size)
+
+        # iterate through labels
+        for i, u in enumerate(self.unique_labels):
+
+            # identify indices of label
+            arr_i = np.flatnonzero(self.labels == u)
+
+            # subset distance matrix to indices
+            sub_dist = self.subset_dist(arr_i, arr_i)
+
+            # take mean distance of subset distance matrix
+            cohesions[i] = sub_dist.mean()
+
+        return cohesions.sum()
+
+    def separation(self):
+        """
+        calculate separation coefficient
+        (i.e. minimum mean between-cluster distance)
+        """
+
+        # initialize distance array
+        separations = np.zeros(self.unique_labels.size)
+
+        # iterate through labels
+        for i, u in enumerate(self.unique_labels):
+
+            current_min = np.inf
+
+            for v in self.unique_labels:
+
+                if u == v:
+                    continue
+
+                arr_i = np.flatnonzero(self.labels == u)
+                arr_j = np.flatnonzero(self.labels == v)
+
+                sub_dist = self.subset_dist(arr_i, arr_j)
+                distance = sub_dist.mean()
+
+                if distance < current_min:
+                    current_min = distance
+
+            separations[i] = current_min
+
+        return separations.sum()
+
+    def score(self, alpha, beta):
+        score = (beta - alpha) / np.max([alpha, beta])
+        return score
+
+    def fit(self):
+        alpha = self.cohesion()
+        beta = self.separation()
+
+        print(alpha, beta)
+        return self.score(alpha, beta)
+
 def main():
     ligands = Ligand("../data/test_set.csv")
-    # kmeans = PartitionClustering(ligands, metric='euclidean')
+    kmeans = PartitionClustering(ligands, metric='euclidean')
+    kmeans.load_dist("temp.npy")
+
+    labels = kmeans.fit(k=6)
+    distmat = kmeans.get_distance_matrix()
+
+    sil = Silhouette(distmat, labels)
+    score = sil.fit()
+    print(score)
+
     # kmeans.pairwise_distance(save=True)
 
-    hclust = HierarchicalClustering(ligands, metric='euclidean')
+    # hclust = HierarchicalClustering(ligands, metric='euclidean')
     # hclust.pairwise_distance(save=True)
-    hclust.load_dist("temp.npy")
-    zmat = hclust.fit()
+    # hclust.load_dist("temp.npy")
+    # zmat = hclust.fit()
 
-    pd.DataFrame(zmat).to_csv("zmat.csv")
+    # pd.DataFrame(zmat).to_csv("zmat.csv")
 
 
 if __name__ == '__main__':
