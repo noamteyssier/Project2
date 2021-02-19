@@ -168,7 +168,7 @@ class Clustering():
             for j in iter_j:
                 yield (i, j)
 
-    def argmin(self, distances):
+    def argmin(self, distances, verbose=False):
         """
         for each observation return the minimal index
         if there are multiple at the minimal index a random choice is given
@@ -238,6 +238,27 @@ class PartitionClustering(Clustering):
         # return indices of lowest distances
         return self.argmin(self.distances)
 
+    def update_cluster(self, k):
+        """
+        update a centroid as the mean of its members
+        """
+
+        if np.any(self.labels == k):
+            # calculate mean of members
+            updated_centroid = self.distmat[self.labels == k].mean(axis=0)
+
+            # find any nans (for failed centroids)
+            idx_nan = np.flatnonzero(np.isnan(updated_centroid))
+
+            # reinitialize as random point in space
+            updated_centroid[idx_nan] = np.random.random(idx_nan.size)
+
+            # return updated centroid
+            return updated_centroid
+
+        else:
+            return self.centroids[k]
+
     def update_clusters(self):
         """
         update clusters with membership
@@ -248,7 +269,7 @@ class PartitionClustering(Clustering):
 
         for k in np.arange(self.k):
 
-            updated_centroids[k] = self.distmat[self.labels == k].mean(axis=0)
+            updated_centroids[k] = self.update_cluster(k)
 
             distances[k] = self.euclidean(
                 self.centroids[k],
@@ -459,11 +480,17 @@ class Silhouette():
         # remove self from list of indices
         cluster_members = cluster_members[cluster_members != idx]
 
-        # extract within cluster distances
-        distances = self.distmat[idx, cluster_members]
+        # cluster is singleton
+        if cluster_members.size == 0:
+            return 0
 
-        # return mean
-        return distances.mean()
+        # cluster has multiple members
+        else:
+            # extract within cluster distances
+            distances = self.distmat[idx, cluster_members]
+
+            # return mean
+            return distances.mean()
 
     def separation(self, idx):
         """
@@ -495,6 +522,17 @@ class Silhouette():
         # return minimum inter-cluster distance
         return cluster_distances.min()
 
+    def score(self, cohesion, separation):
+        """
+        calculate silhouette score for a given observation
+        """
+
+        if (separation == 0) & (cohesion == 0):
+            return 0
+
+        else:
+            return (separation - cohesion) / np.max([cohesion, separation])
+
     def fit(self):
         """
         calculates silhouette scores for each observation
@@ -513,7 +551,7 @@ class Silhouette():
             separation = self.separation(idx)
 
             # calculate silhouette score
-            s_i[idx] = (separation - cohesion) / np.max([cohesion, separation])
+            s_i[idx] = self.score(cohesion, separation)
 
         # return silhouettes
         return s_i
@@ -524,7 +562,7 @@ def main():
     kmeans = PartitionClustering(ligands, metric='euclidean')
     kmeans.load_dist("temp.npy")
 
-    labels = kmeans.fit(k=100)
+    labels = kmeans.fit(k=8)
     distmat = kmeans.get_distance_matrix()
 
     sil = Silhouette(distmat, labels)
