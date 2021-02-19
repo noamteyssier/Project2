@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import numba as nb
 from scipy.spatial.distance import squareform
+from tqdm import tqdm
 
 
 @nb.jit(nopython=True, fastmath=True)
@@ -371,16 +372,171 @@ class PartitionClustering(Clustering):
             return self.labels
 
 
+class HierarchicalClustering(Clustering):
+
+    def linkage_single(self, d):
+        return d.min()
+
+    def linkage_complete(self, d):
+        return d.max()
+
+    def linkage_average(self, d):
+        return d.mean()
+
+    def init_linkage_matrix(self):
+        """
+        a linkage matrix specified by scipy linkage matrix format
+
+        2D matrix (n-1, 4):
+            [cls_i, cls_j, dist, # original observations in new cluster]
+        """
+        return np.zeros(
+            (self.n-1, 4)
+            )
+
+    def init_labels(self):
+        """
+        initializes unique label for each observation
+        """
+
+        return np.arange(self.n)
+
+    def minimal_distance(self):
+        """
+        finds the minimal distance between all clusters and
+        returns pair and distance
+        """
+
+        # find all unique cluster labels
+        unique_clusters = np.unique(self.labels)
+
+        # initialize variables
+        min_dist = 0
+        min_pair = None
+
+        # iterate through unique pairs of labels
+        iter = 0
+        for i, j in PairwiseIter(unique_clusters.size):
+
+            label_i = unique_clusters[i]
+            label_j = unique_clusters[j]
+
+            # find indices of cluster members
+            m1 = np.flatnonzero(self.labels == label_i)
+            m2 = np.flatnonzero(self.labels == label_j)
+
+            # build interaction of indices
+            indices = np.ix_(m1, m2)
+
+            # subset distance matrix to reflect interaction of indices
+            all_distances = self.distmat[indices].ravel()
+
+            # calculate linkage distance
+            linkage_distance = self.linkage_method(all_distances)
+
+            # accept linkage as new minima or continue
+            if (linkage_distance <= min_dist) | (iter == 0):
+                min_dist = linkage_distance
+                min_pair = (label_i, label_j)
+
+            iter += 1
+
+        return min_pair, min_dist
+
+    def update_linkage_matrix(self, pair, dist, iter):
+        """
+        updates linkage matrix of incoming merge
+        """
+
+        # splits pair into labels
+        x, y = pair
+
+        # calculates number of nodes in new merger
+        num_orig = (self.labels == x).sum() + (self.labels == y).sum()
+
+        # updates linkage with merge
+        self.zmat[iter] = np.array([
+            int(x), int(y), dist, int(num_orig)
+        ])
+
+    def update_clusters(self, pair):
+        """
+        merges cluster X and cluster Y into a single cluster of label z
+        """
+
+        # split pair into labels
+        x, y = pair
+
+        # name of new label
+        z = self.num_clusters
+
+        # increment number of labels
+        self.num_clusters += 1
+
+        # select for all indices of x or y
+        label_indices = np.flatnonzero(
+            (self.labels == x) | (self.labels == y)
+        )
+
+        # update merged labels to reflect new cluster label
+        self.labels[label_indices] = z
+
+    def __fit__(self, data, linkage='single', precomputed=True):
+
+        if precomputed:
+            self.distmat = data
+        else:
+            self.distmat = PairwiseDistance(data, metric=self.metric)
+
+        self.n = self.distmat.shape[0]
+
+        # define linkage method
+        self.linkages = {
+            "single": self.linkage_single,
+            "complete": self.linkage_complete,
+            "average": self.linkage_average
+        }
+        self.linkage_method = self.linkages[linkage]
+
+        # initialize linkage matrix
+        self.zmat = self.init_linkage_matrix()
+
+        # populate initial labels
+        self.labels = self.init_labels()
+
+        # track number of unique cluster labels (will increase with mergers)
+        self.num_clusters = self.labels.size
+
+        # main loop
+        for iter in tqdm(np.arange(self.zmat.shape[0])):
+
+            # find minimal distance
+            pair, dist = self.minimal_distance()
+
+            # update linkage matrix
+            self.update_linkage_matrix(pair, dist, iter)
+
+            # merge clusters of minimap pairs
+            self.update_clusters(pair)
+
+        # return linkage matrix
+        return self.zmat
+
+
 def main():
-    ligands = Ligand("../data/subset.csv")
+    ligands = Ligand("../data/test_set.csv")
     # distmat = ligands.pdist(metric='jaccard')
     # np.save("subset.npy", distmat)
-    distmat = np.load("subset.npy")
+    distmat = np.load("test_set.npy")
 
-    km = PartitionClustering(metric='euclidean', seed=None)
-    km.fit(distmat, k=15)
-    sil = km.score()
-    print(sil.mean())
+    # km = PartitionClustering(metric='euclidean', seed=None)
+    # km.fit(distmat, k=15)
+    # sil = km.score()
+    # print(sil.mean())
+
+    hc = HierarchicalClustering(metric='euclidean', seed=42)
+    hc.fit(distmat)
+
 
 
 if __name__ == '__main__':
@@ -645,149 +801,6 @@ if __name__ == '__main__':
 #
 #         return self.labels
 #
-#
-# class HierarchicalClustering(Clustering):
-#
-#     def linkage_single(self, d):
-#         return d.min()
-#
-#     def linkage_complete(self, d):
-#         return d.max()
-#
-#     def linkage_average(self, d):
-#         return d.mean()
-#
-#     def init_linkage_matrix(self):
-#         """
-#         a linkage matrix specified by scipy linkage matrix format
-#
-#         2D matrix (n-1, 4):
-#             [cls_i, cls_j, dist, # original observations in new cluster]
-#         """
-#         return np.zeros(
-#             (self.ligands.size-1, 4)
-#             )
-#
-#     def init_labels(self):
-#         """
-#         initializes unique label for each observation
-#         """
-#
-#         return np.arange(self.ligands.size)
-#
-#     def minimal_distance(self):
-#         """
-#         finds the minimal distance between all clusters and
-#         returns pair and distance
-#         """
-#
-#         # find all unique cluster labels
-#         unique_clusters = np.unique(self.labels)
-#
-#         # initialize variables
-#         min_dist = 0
-#         min_pair = None
-#
-#         # iterate through unique pairs of labels
-#         iter = 0
-#         for i, j in self.pairwise_iter(unique_clusters):
-#
-#             label_i = unique_clusters[i]
-#             label_j = unique_clusters[j]
-#
-#             # find indices of cluster members
-#             m1 = np.flatnonzero(self.labels == label_i)
-#             m2 = np.flatnonzero(self.labels == label_j)
-#
-#             # build interaction of indices
-#             indices = np.ix_(m1, m2)
-#
-#             # subset distance matrix to reflect interaction of indices
-#             all_distances = self.distmat[indices].ravel()
-#
-#             # calculate linkage distance
-#             linkage_distance = self.linkage_method(all_distances)
-#
-#             # accept linkage as new minima or continue
-#             if (linkage_distance <= min_dist) | (iter == 0):
-#                 min_dist = linkage_distance
-#                 min_pair = (label_i, label_j)
-#
-#             iter += 1
-#
-#         return min_pair, min_dist
-#
-#     def update_linkage_matrix(self, pair, dist, iter):
-#         """
-#         updates linkage matrix of incoming merge
-#         """
-#
-#         # splits pair into labels
-#         x, y = pair
-#
-#         # calculates number of nodes in new merger
-#         num_orig = (self.labels == x).sum() + (self.labels == y).sum()
-#
-#         # updates linkage with merge
-#         self.zmat[iter] = np.array([
-#             int(x), int(y), dist, int(num_orig)
-#         ])
-#
-#     def update_clusters(self, pair):
-#         """
-#         merges cluster X and cluster Y into a single cluster of label z
-#         """
-#
-#         # split pair into labels
-#         x, y = pair
-#
-#         # name of new label
-#         z = self.num_clusters
-#
-#         # increment number of labels
-#         self.num_clusters += 1
-#
-#         # select for all indices of x or y
-#         label_indices = np.flatnonzero(
-#             (self.labels == x) | (self.labels == y)
-#         )
-#
-#         # update merged labels to reflect new cluster label
-#         self.labels[label_indices] = z
-#
-#     def __fit__(self, linkage='single'):
-#
-#         # define linkage method
-#         self.linkages = {
-#             "single": self.linkage_single,
-#             "complete": self.linkage_complete,
-#             "average": self.linkage_average
-#         }
-#         self.linkage_method = self.linkages[linkage]
-#
-#         # initialize linkage matrix
-#         self.zmat = self.init_linkage_matrix()
-#
-#         # populate initial labels
-#         self.labels = self.init_labels()
-#
-#         # track number of unique cluster labels (will increase with mergers)
-#         self.num_clusters = self.labels.size
-#
-#         # main loop
-#         for iter in np.arange(self.zmat.shape[0]):
-#
-#             # find minimal distance
-#             pair, dist = self.minimal_distance()
-#
-#             # update linkage matrix
-#             self.update_linkage_matrix(pair, dist, iter)
-#
-#             # merge clusters of minimap pairs
-#             self.update_clusters(pair)
-#
-#         # return linkage matrix
-#         return self.zmat
 #
 #
 # class Silhouette():
