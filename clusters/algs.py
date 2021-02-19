@@ -229,6 +229,9 @@ class PartitionClustering(Clustering):
         return centroids
 
     def assign_centroids(self):
+        """
+        assign all observations to their closest centroid
+        """
 
         # iterate through observations
         for idx in np.arange(self.n):
@@ -245,6 +248,11 @@ class PartitionClustering(Clustering):
             self.labels[idx] = self.argmin(k_dist)
 
     def update_centroids(self):
+        """
+        create new centroids from the means of their members
+
+        return a distance
+        """
 
         distances = np.zeros(self.k)
         self.new_centroids = self.centroids.copy()
@@ -265,23 +273,36 @@ class PartitionClustering(Clustering):
         return distances.sum()
 
     def score(self):
+        """
+        calculate silhouette scores for each observation
+        """
 
+        # initialize silhouette score array
         s_i = np.zeros(self.n)
 
+        # iterate through each observation
         for i in np.arange(self.n):
 
+            # subset observation's cached centroid distances
             vals = self._scores[i]
+
+            # subset observation's label
             label = self.labels[i]
+
+            # initialize mask of all clusters observation is outside
             mask = np.arange(self.k) != label
 
+            # cohesion : within-cluster distance
             a_i = vals[label]
 
-            if mask.sum() == 0:
+            # separation : minimum between-cluster distance
+            if mask.sum() == 0:  # case where only 1 k given
                 b_i = 0
             else:
                 b_i = np.min(vals[mask])
 
-            if (a_i == 0) & (b_i == 0):
+            # calculates silhouette coefficient
+            if (a_i == 0) & (b_i == 0):  # case where division by zero
                 score = 0
             else:
                 score = (b_i-a_i) / np.max([a_i, b_i])
@@ -291,37 +312,59 @@ class PartitionClustering(Clustering):
         return s_i
 
     def __fit__(self, data, k, max_iter=100):
+        """
+        K-Means Implementation
+        """
+
+        # cache inputs
         self.data = data
         self.k = k
 
+        # dimensions of input data
         self.n = self.data.shape[0]
         self.m = self.data.shape[1]
 
+        # initialize empty labels array
         self.labels = np.zeros(self.n, dtype=np.int_)
+
+        # initialize empty centroid distance cache
         self._scores = np.zeros((self.n, self.k))
 
+        # initialize centroids
         self.centroids = self.initialize_centroids()
 
+        # catches cases where k < 2
         if self.k < 2:
             self.assign_centroids()
             return self.labels
 
         else:
+
             iter = 0
             current_distance = np.inf
 
             while True:
 
+                # assign each observation to a centroid
                 self.assign_centroids()
+
+                # calculate global centroid movement cost
                 distance = self.update_centroids()
 
+                # if centroids are moving to minimize distance
                 if distance < current_distance:
+
+                    # set new global distance to beat
                     current_distance = distance
+
+                    # update centroids
                     self.centroids = self.new_centroids
 
+                # quit if the max iterations are hit
                 elif iter == max_iter:
                     break
 
+                # quit if centroids moved and increased global distance
                 else:
                     break
 
@@ -329,16 +372,15 @@ class PartitionClustering(Clustering):
 
 
 def main():
-
     ligands = Ligand("../data/subset.csv")
     # distmat = ligands.pdist(metric='jaccard')
     # np.save("subset.npy", distmat)
     distmat = np.load("subset.npy")
 
-    km = PartitionClustering(metric='eulidean', seed=42)
-    km.fit(distmat, k=3)
+    km = PartitionClustering(metric='euclidean', seed=None)
+    km.fit(distmat, k=15)
     sil = km.score()
-    print(sil)
+    print(sil.mean())
 
 
 if __name__ == '__main__':
