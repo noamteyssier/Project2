@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import numba as nb
 from scipy.spatial.distance import squareform
-import sys
 
 
 @nb.jit(nopython=True, fastmath=True)
@@ -180,35 +179,51 @@ class Clustering:
 class PartitionClustering(Clustering):
 
     def initialize_centroids(self):
+        """
+        k++ algorithm for initializing centroids
+        """
 
+        # initialize uniform probability
         prob = np.ones(self.n)
         prob /= prob.sum()
+
+        # contains chosen indices
         self._k_indices = []
+
+        # contains centroids
         centroids = np.zeros((self.k, self.m))
 
+        # initialize k centroids
         for k in np.arange(self.k):
 
-            # select centroid
+            # select observation with some probability
             c_idx = np.random.choice(self.n, p=prob)
+
+            # append choice to container
             self._k_indices.append(c_idx)
 
+            # initialize distance matrix at epoch
             distances = np.zeros((self.n, len(self._k_indices)))
 
+            # for each existing centroid
             for i in np.arange(len(self._k_indices)):
 
-                # calculate distances
+                # calculate distances of all points to that centroid
                 distances[:,i] = self.paired_distance(
                     self.data[self._k_indices[i]],
                     self.data[np.arange(self.n)]
                 ) ** 2
 
+            # take minimal distance across all centroids
             sq_distances = np.min(distances, axis=1)
 
-            # set chosen points probability to zero
+            # set already chosen points probability to zero
             sq_distances[self._k_indices] = 0
 
-            # normalize frequencies
+            # normalize distances to probabilities
             prob = sq_distances / sq_distances.sum()
+
+            # assign centroid to container
             centroids[k] = self.data[c_idx]
 
         return centroids
