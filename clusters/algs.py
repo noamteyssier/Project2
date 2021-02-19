@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
 from multiprocessing import Pool
+import sys
 
 
 class Ligand():
@@ -207,12 +208,36 @@ class PartitionClustering(Clustering):
 
     def initialize_centroids(self):
         """
-        initialize <k> centroids as <k> random observations from dataset
+        initialize <k> centroids with k++ algorithm
         """
 
-        centroids = self.distmat[
-            np.random.choice(self.ligands.size, size=self.k)
-        ]
+        centroids = np.zeros((self.k, self.distmat.shape[1]))
+        self._chosen_indices = []
+
+        # initialize uniform density
+        current_probability = np.ones(self.ligands.size)
+        current_probability /= current_probability.sum()
+
+        for i in np.arange(self.k):
+
+            # Choose one center random among the data points.
+            centroid_idx = np.random.choice(
+                self.ligands.size, p=current_probability
+                )
+            self._chosen_indices.append(centroid_idx)
+
+            # select all distances to centroid
+            squared_distances = self.distmat[:, centroid_idx] ** 3
+
+            # zero out already chosen centroids
+            squared_distances[self._chosen_indices] = 0
+
+            # set probability to squared distance frequencies
+            current_probability = squared_distances / squared_distances.sum()
+
+            # assign centroid
+            centroids[i] = self.distmat[centroid_idx]
+
         return centroids
 
     def assign_centroids(self):
@@ -291,6 +316,7 @@ class PartitionClustering(Clustering):
             # assign each observation to centroids
             self.labels = self.assign_centroids()
 
+            break
             # calculate global distance and calculate new centroids
             distance, updated_centroids = self.update_clusters()
 
@@ -559,16 +585,17 @@ class Silhouette():
 
 def main():
     ligands = Ligand("../data/test_set.csv")
-    kmeans = PartitionClustering(ligands, metric='euclidean')
+    kmeans = PartitionClustering(ligands, metric='euclidean', seed=42)
+    kmeans.pairwise_distance(save=True)
     kmeans.load_dist("temp.npy")
 
-    labels = kmeans.fit(k=8)
-    distmat = kmeans.get_distance_matrix()
+    labels = kmeans.fit(k=2)
+    print(labels)
+    # distmat = kmeans.get_distance_matrix()
 
-    sil = Silhouette(distmat, labels)
-    silhouettes = sil.fit()
-
-    print(silhouettes.mean())
+    # sil = Silhouette(distmat, labels)
+    # silhouettes = sil.fit()
+    # print(silhouettes.mean())
 
     # kmeans.pairwise_distance(save=True)
 
