@@ -1,11 +1,11 @@
 
 import numpy as np
-from clusters.algs import Ligand
 from clusters.algs import PartitionClustering
 from clusters.algs import HierarchicalClustering
 from clusters.algs import PairwiseDistance
 
 np.random.seed(42)
+
 
 def test_pdist():
     """
