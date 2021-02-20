@@ -798,7 +798,7 @@ class HierarchicalClustering(Clustering):
         if precomputed:
             self.distmat = data
         else:
-            self.distmat = PairwiseDistance(data, metric=self.metric)
+            self.distmat = self.pdist(data)
 
         self.n = self.distmat.shape[0]
 
