@@ -518,14 +518,47 @@ class PartitionClustering(Clustering):
 
 
 class HierarchicalClustering(Clustering):
+    """
+    Implementation of Hierarchical Agglomerative Clustering
+    """
 
     def linkage_single(self, d):
+        """
+        Linkage Calculation Single
+
+        :param d:
+            1D array of distances
+
+        :return:
+            Single Linkage (Minimum) (float)
+        """
+
         return d.min()
 
     def linkage_complete(self, d):
+        """
+        Linkage Calculation Complete
+
+        :param d:
+            1D array of distances
+
+        :return:
+            Complete Linkage (Maximum) (float)
+        """
+
         return d.max()
 
     def linkage_average(self, d):
+        """
+        Linkage Calculation Average
+
+        :param d:
+            1D array of distances
+
+        :return:
+            Average Linkage (Mean) (float)
+        """
+
         return d.mean()
 
     def init_linkage_matrix(self):
@@ -534,6 +567,9 @@ class HierarchicalClustering(Clustering):
 
         2D matrix (n-1, 4):
             [cls_i, cls_j, dist, # original observations in new cluster]
+
+        :return:
+            2D Linkage Matrix
         """
         return np.zeros(
             (self.n-1, 4)
@@ -542,6 +578,9 @@ class HierarchicalClustering(Clustering):
     def init_label_lineage(self):
         """
         initialize lineage of labels
+
+        :return:
+            2D Matrix representing labels at each epoch
         """
         return np.zeros(
             (self.n-1, self.n), dtype=np.int32
@@ -550,6 +589,9 @@ class HierarchicalClustering(Clustering):
     def init_labels(self):
         """
         initializes unique label for each observation
+
+        :return:
+            1D array representing labels for each observation
         """
 
         return np.arange(self.n)
@@ -558,6 +600,9 @@ class HierarchicalClustering(Clustering):
         """
         finds the minimal distance between all clusters and
         returns pair and distance
+
+        :return:
+            (pair of indices as tuple, minimum distance (float))
         """
 
         # find all unique cluster labels
@@ -623,6 +668,9 @@ class HierarchicalClustering(Clustering):
         ])
 
     def update_label_lineage(self, iter):
+        """
+        updates current epoch with current labels
+        """
         self.label_lineage[iter] = self.labels
 
     def update_clusters(self, pair):
@@ -649,14 +697,29 @@ class HierarchicalClustering(Clustering):
 
     def get_lineage(self):
         """
-        return lineage of labels
+        Gets label lineage
+
+        :return:
+            2D array of labels at each epoch
         """
 
         return self.label_lineage
 
     def score(self, idx):
         """
-        score the clustering at a given epoch
+        Calculates silhouette coefficients of clustering at a given epoch
+
+        a_i = cohesion (mean within-cluster distance)
+        b_i = separation (minimum mean between-cluster distance)
+        s_i = silhouette coefficient
+
+        s_i = (b_i - a_i) / max(a_i, b_i)
+
+        :param idx:
+            epoch to calculate silhouette coefficients
+
+        :return:
+            array of silhouette coefficients
         """
 
         # initialize silhouette score array
@@ -708,6 +771,27 @@ class HierarchicalClustering(Clustering):
         return s_i
 
     def __fit__(self, data, linkage='single', precomputed=True):
+        """
+        Hierarchical Agglomerative Clustering Implementation
+
+        - Initialize each point as its own cluster
+
+        Iteratively :
+            - Find nearest neighbors between clusters
+            - Merge Clusters
+
+        Quits at fully connected hierarchy
+
+        :param data:
+            2D numpy array to cluster
+        :param linkage:
+            linkage method (single, complete, average)
+        :param precomputed:
+            bool reflecting whether input data is already a distance matrix
+
+        :return:
+            2D Linkage Matrix
+        """
 
         if precomputed:
             self.distmat = data
