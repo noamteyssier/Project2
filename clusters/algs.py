@@ -291,6 +291,9 @@ class Clustering:
 
 
 class PartitionClustering(Clustering):
+    """
+    Implementation of KMeans Clustering
+    """
 
     def initialize_centroids(self):
         """
@@ -365,7 +368,8 @@ class PartitionClustering(Clustering):
         """
         create new centroids from the means of their members
 
-        return a distance
+        :return:
+            global distance (float)
         """
 
         distances = np.zeros(self.k)
@@ -388,7 +392,16 @@ class PartitionClustering(Clustering):
 
     def score(self):
         """
-        calculate silhouette scores for each observation
+        calculate silhouette coefficients for each observation.
+
+        a_i = cohesion (mean within-cluster distance)
+        b_i = separation (minimum mean between-cluster distance)
+        s_i = silhouette coefficient
+
+        s_i = (b_i - a_i) / max(a_i, b_i)
+
+        :return:
+            array of silhouette coefficients
         """
 
         # initialize silhouette score array
@@ -428,6 +441,25 @@ class PartitionClustering(Clustering):
     def __fit__(self, data, k, max_iter=100):
         """
         K-Means Implementation
+
+        - Initialize centroids with K++ Algorithm.
+
+        Iteratively :
+            - Assign Clusters
+            - Update Centroids
+            - Measure Global Distance
+
+        Quits at distance minima
+
+        :param data:
+            2D numpy array to cluster
+        :param k:
+            Number of clusters (int)
+        :param max_iter:
+            Number of iterations to run before quitting
+
+        :return:
+            1D array of labels
         """
 
         # cache inputs
