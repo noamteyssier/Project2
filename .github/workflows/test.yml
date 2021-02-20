@@ -30,4 +30,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run unit tests
-        run: python -m pytest -v clusters/test.py
+        run: python -m pytest -v clusters/test_clusters.py
