@@ -9,6 +9,17 @@ from tqdm import tqdm
 
 @nb.jit(nopython=True, fastmath=True)
 def euclidean(x, y):
+    """
+    calculates euclidean distance of two arrays (expects equal size arrays)
+
+    :param x:
+        1d numpy array
+    :param y:
+        1d numpy array
+
+    :return: Euclidean distance
+    :rtype: float
+    """
     return np.sqrt(
         np.sum((y-x)**2)
         )
@@ -16,6 +27,17 @@ def euclidean(x, y):
 
 @nb.jit(nopython=True)
 def jaccard(x, y):
+    """
+    calculates jaccard distance of two arrays (expects equal size arrays)
+
+    :param x:
+        1d numpy array
+    :param y:
+        1d numpy array
+
+    :return: Jaccard distance
+    :rtype: float
+    """
     mask_x = (x > 0)
     mask_y = (y > 0)
 
@@ -27,7 +49,13 @@ def jaccard(x, y):
 @nb.jit(nopython=True)
 def PairwiseIter(n):
     """
-    iterates through pairwise indices over range N
+    Generator that iterates through pairwise indices over range N
+
+    :param n:
+        An integer whose range to generate unique pairwise indices
+
+    :return:
+        A generator of unique pairwise indices
     """
     for i in np.arange(n):
         for j in np.arange(i, n):
@@ -37,6 +65,17 @@ def PairwiseIter(n):
 
 @nb.jit(nopython=True)
 def PairwiseDistance(m, metric='euclidean'):
+    """
+    Calculates pairwisde distances of a given 2D array
+
+    :param m:
+        2D numpy array
+    :param metric:
+        String (euclidean / jaccard)
+
+    :return:
+        1D Condensed Distance Vector
+    """
     distances = np.zeros(
         int((m.shape[0] * (m.shape[0] - 1)) / 2)
     )
@@ -57,7 +96,16 @@ def PairwiseDistance(m, metric='euclidean'):
 
 def ClusterSimilarity(label_x, label_y):
     """
-    Calculates similarity between two cluster labels
+    Calculates similarity between two cluster labels through neighborhood
+    jaccard index over all observations.
+
+    :param label_x:
+        1D numpy array of labels
+    :param label_y:
+        1D numpy array of labels
+
+    :return:
+        mean jaccard similarity (float)
     """
 
     assert label_x.size == label_y.size, "Requires Equal Sized Arrays"
@@ -83,6 +131,14 @@ def ClusterSimilarity(label_x, label_y):
 
 
 class Ligand():
+    """
+    Class to handle IO of ligand information
+
+    :param fn:
+        Filename of CSV to read in ligand information
+    :param bitspace:
+        Expected Dimensions of bitvector
+    """
 
     def __init__(self, fn, bitspace=1024):
         self.fn = fn
@@ -127,31 +183,25 @@ class Ligand():
 
     def iter_bits(self, onbits):
         """
-        generator to transform csv-string representation
-        of activations into integers
+        Converts CSV activations to generator of integers
+
+        :param onbits:
+            CSV-String of activations
+        :return:
+            Generator of integers representing activations
+
         """
         for b in onbits.strip().split(","):
             yield int(b)
 
-    def get_activations(self, index):
-        """
-        returns activations for a given molecule
-        """
-        return np.flatnonzero(self.mat[index])
-
-    def get_dense(self, index):
-        """
-        returns dense array of activations for a given molecule
-        """
-        return self.mat[index]
-
-    def iter_dense(self):
-        for idx in self:
-            yield self.get_dense(idx)
-
     def pdist(self, metric='jaccard'):
         """
         calculate pairwise distances within a matrix
+
+        :param metric:
+            distance metric to use (either euclidean/jaccard)
+        :return:
+            2D Distance Matrix
         """
         self.distmat = squareform(
             PairwiseDistance(self.mat, metric=metric)
@@ -165,12 +215,17 @@ class Ligand():
         """
         return self.frame.shape[0]
 
-    def __iter__(self):
-        for idx in np.arange(self.size):
-            yield idx
-
 
 class Clustering:
+    """
+    Parent class for clustering
+
+    :param metric:
+        distance metric to use (either euclidean/jaccard)
+    :param seed:
+        random seed
+    """
+
     def __init__(self, metric='euclidean', seed=None):
         if seed:
             np.random.seed(seed)
@@ -181,6 +236,15 @@ class Clustering:
             self.fn_metric = jaccard
 
     def pdist(self, data):
+        """
+        calculate pairwise distances within a matrix
+
+        :param metric:
+            distance metric to use (either euclidean/jaccard)
+        :return:
+            2D Distance Matrix
+        """
+
         return squareform(
             PairwiseDistance(data, metric=self.metric)
             )
@@ -188,19 +252,41 @@ class Clustering:
     def paired_distance(self, x, arr_y):
         """
         calculate distances between x and all values in arr_y
+
+        :param x:
+            1D array
+        :param arr_y:
+            2D array
+
+        :return:
+            1D array of distances between x and all values in arr_y
         """
+
         distances = np.zeros(arr_y.shape[0])
         for i, y in enumerate(arr_y):
             distances[i] = self.fn_metric(x, y)
         return distances
 
     def argmin(self, x):
+        """
+        returns argmin of an array with random choice of ties
+
+        :param x:
+            1D array
+
+        :return:
+            int (index of minimum)
+        """
+
         m = np.min(x)
         return np.random.choice(
             np.flatnonzero(x == m)
         )
 
-    def fit(self, *args, **kwargs):
+    def cluster(self, *args, **kwargs):
+        """
+        calls cluster method of child class
+        """
         return self.__fit__(*args, **kwargs)
 
 
