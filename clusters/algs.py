@@ -230,6 +230,8 @@ class Clustering:
         if seed:
             np.random.seed(seed)
 
+        self.metric = metric
+
         if metric == 'euclidean':
             self.fn_metric = euclidean
         else:
