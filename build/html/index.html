@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Welcome to Project2’s documentation! &mdash; Clustering 19 February 2021 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> Clustering
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to Project2’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Clustering</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Welcome to Project2’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-clusters.algs">
+<span id="welcome-to-project2-s-documentation"></span><h1>Welcome to Project2’s documentation!<a class="headerlink" href="#module-clusters.algs" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="clusters.algs.ClusterSimilarity">
+<code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">ClusterSimilarity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label_x</span></em>, <em class="sig-param"><span class="n">label_y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.ClusterSimilarity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates similarity between two cluster labels through neighborhood
+jaccard index over all observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label_x</strong> – 1D numpy array of labels</p></li>
+<li><p><strong>label_y</strong> – 1D numpy array of labels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mean jaccard similarity (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="clusters.algs.Clustering">
+<em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">Clustering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Clustering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent class for clustering</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> – distance metric to use (either euclidean/jaccard)</p></li>
+<li><p><strong>seed</strong> – random seed</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="clusters.algs.Clustering.argmin">
+<code class="sig-name descname">argmin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Clustering.argmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns argmin of an array with random choice of ties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – 1D array</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int (index of minimum)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Clustering.cluster">
+<code class="sig-name descname">cluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Clustering.cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>calls cluster method of child class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Clustering.paired_distance">
+<code class="sig-name descname">paired_distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">arr_y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Clustering.paired_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate distances between x and all values in arr_y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – 1D array</p></li>
+<li><p><strong>arr_y</strong> – 2D array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D array of distances between x and all values in arr_y</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Clustering.pdist">
+<code class="sig-name descname">pdist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Clustering.pdist" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate pairwise distances within a matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric</strong> – distance metric to use (either euclidean/jaccard)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2D Distance Matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="clusters.algs.HierarchicalClustering">
+<em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">HierarchicalClustering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.get_lineage">
+<code class="sig-name descname">get_lineage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.get_lineage" title="Permalink to this definition">¶</a></dt>
+<dd><p>return lineage of labels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.init_label_lineage">
+<code class="sig-name descname">init_label_lineage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.init_label_lineage" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize lineage of labels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.init_labels">
+<code class="sig-name descname">init_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.init_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>initializes unique label for each observation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.init_linkage_matrix">
+<code class="sig-name descname">init_linkage_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.init_linkage_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>a linkage matrix specified by scipy linkage matrix format</p>
+<dl class="simple">
+<dt>2D matrix (n-1, 4):</dt><dd><p>[cls_i, cls_j, dist, # original observations in new cluster]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.minimal_distance">
+<code class="sig-name descname">minimal_distance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.minimal_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>finds the minimal distance between all clusters and
+returns pair and distance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.score">
+<code class="sig-name descname">score</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>score the clustering at a given epoch</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.update_clusters">
+<code class="sig-name descname">update_clusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pair</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.update_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>merges cluster X and cluster Y into a single cluster of label z</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.update_linkage_matrix">
+<code class="sig-name descname">update_linkage_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pair</span></em>, <em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">iter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.update_linkage_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates linkage matrix of incoming merge</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="clusters.algs.Ligand">
+<em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">Ligand</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="n">bitspace</span><span class="o">=</span><span class="default_value">1024</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to handle IO of ligand information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> – Filename of CSV to read in ligand information</p></li>
+<li><p><strong>bitspace</strong> – Expected Dimensions of bitvector</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="clusters.algs.Ligand.init_mat">
+<code class="sig-name descname">init_mat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.init_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>instantiates sparse matrix of shape (N,M)</p>
+<p>N: Number of Molecules
+M: Bitvector Feature Length</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Ligand.iter_bits">
+<code class="sig-name descname">iter_bits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">onbits</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.iter_bits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts CSV activations to generator of integers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>onbits</strong> – CSV-String of activations</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generator of integers representing activations</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Ligand.load_csv">
+<code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.load_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads in csv and populates frame attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Ligand.load_mat">
+<code class="sig-name descname">load_mat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.load_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>handles creation of sparse matrix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Ligand.pdist">
+<code class="sig-name descname">pdist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'jaccard'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.pdist" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate pairwise distances within a matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric</strong> – distance metric to use (either euclidean/jaccard)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>2D Distance Matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.Ligand.populate_mat">
+<code class="sig-name descname">populate_mat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.Ligand.populate_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets activations for each molecule by iterating through onbits</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="clusters.algs.PairwiseDistance">
+<code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">PairwiseDistance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PairwiseDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates pairwisde distances of a given 2D array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – 2D numpy array</p></li>
+<li><p><strong>metric</strong> – String (euclidean / jaccard)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1D Condensed Distance Vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="clusters.algs.PairwiseIter">
+<code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">PairwiseIter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PairwiseIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that iterates through pairwise indices over range N</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – An integer whose range to generate unique pairwise indices</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A generator of unique pairwise indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="clusters.algs.PartitionClustering">
+<em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">PartitionClustering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="clusters.algs.PartitionClustering.assign_centroids">
+<code class="sig-name descname">assign_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.assign_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>assign all observations to their closest centroid</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.PartitionClustering.initialize_centroids">
+<code class="sig-name descname">initialize_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.initialize_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>k++ algorithm for initializing centroids</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.PartitionClustering.score">
+<code class="sig-name descname">score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate silhouette scores for each observation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.PartitionClustering.update_centroids">
+<code class="sig-name descname">update_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.update_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>create new centroids from the means of their members</p>
+<p>return a distance</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="clusters.algs.euclidean">
+<code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">euclidean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.euclidean" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates euclidean distance of two arrays (expects equal size arrays)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – 1d numpy array</p></li>
+<li><p><strong>y</strong> – 1d numpy array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Euclidean distance</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="clusters.algs.jaccard">
+<code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">jaccard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.jaccard" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates jaccard distance of two arrays (expects equal size arrays)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – 1d numpy array</p></li>
+<li><p><strong>y</strong> – 1d numpy array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jaccard distance</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Noam Teyssier.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
