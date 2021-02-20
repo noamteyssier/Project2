@@ -2,576 +2,644 @@
 
 import numpy as np
 import pandas as pd
-import sys
+import numba as nb
+from scipy.spatial.distance import squareform
+from tqdm import tqdm
+
+
+@nb.jit(nopython=True, fastmath=True)
+def euclidean(x, y):
+    return np.sqrt(
+        np.sum((y-x)**2)
+        )
+
+
+@nb.jit(nopython=True)
+def jaccard(x, y):
+    mask_x = (x > 0)
+    mask_y = (y > 0)
+
+    ix = np.sum(mask_x & mask_y)
+    un = np.sum(mask_x | mask_y)
+    return ix / un
+
+
+@nb.jit(nopython=True)
+def PairwiseIter(n):
+    """
+    iterates through pairwise indices over range N
+    """
+    for i in np.arange(n):
+        for j in np.arange(i, n):
+            if j > i:
+                yield (i, j)
+
+
+@nb.jit(nopython=True)
+def PairwiseDistance(m, metric='euclidean'):
+    distances = np.zeros(
+        int((m.shape[0] * (m.shape[0] - 1)) / 2)
+    )
+    iter = 0
+
+    path = (metric == 'euclidean')
+
+    for (i, j) in PairwiseIter(m.shape[0]):
+
+        if path:
+            distances[iter] = euclidean(m[i], m[j])
+        else:
+            distances[iter] = jaccard(m[i], m[j])
+        iter += 1
+
+    return distances
+
+
+def ClusterSimilarity(label_x, label_y):
+    """
+    Calculates similarity between two cluster labels
+    """
+
+    assert label_x.size == label_y.size, "Requires Equal Sized Arrays"
+
+    similarities = np.zeros(label_x.size)
+
+    # iterates through observations
+    for idx in np.arange(label_x.size):
+
+        # identify labels at position idx
+        lx = label_x[idx]
+        ly = label_y[idx]
+
+        # identify neighbors for each label set
+        nx = set(np.flatnonzero(label_x == lx))
+        ny = set(np.flatnonzero(label_y == ly))
+
+        # calculates jaccard similarity between both sets
+        similarities[idx] = len(nx.intersection(ny)) / len(nx.union(ny))
+
+    # returns mean similarity over all observations
+    return similarities.mean()
 
 
 class Ligand():
 
-    """
-    Handles relevant information and tools for ligands
-
-    - IO
-    - SparseArrays
-    - Values
-
-    """
-
-    def __init__(self, csv, bitspace=1024):
-        self.csv = csv
-        self.csv_frame = self._load_csv(csv)
-        self.sparse, self.lookup = self._prepare_sparse()
-
+    def __init__(self, fn, bitspace=1024):
+        self.fn = fn
         self.bitspace = bitspace
-        self.mean = self._mean_activation()
 
-    def _load_csv(self, csv):
+        self.load_csv()
+        self.load_mat()
+        self.size = len(self)
+
+    def load_csv(self):
         """
-        read in csv from path
+        reads in csv and populates frame attribute
+        """
+        self.frame = pd.read_csv(self.fn)
+
+    def load_mat(self):
+        """
+        handles creation of sparse matrix
         """
 
-        frame = pd.read_csv(csv, sep=",")
-        frame['idx'] = np.arange(frame.shape[0])
-        return frame
+        self.init_mat()
+        self.populate_mat()
 
-    def _prepare_sparse(self):
+    def init_mat(self):
         """
-        process onbits into sets for pairwise evaluation
-        create lookup table for ligand index with ligand name
+        instantiates sparse matrix of shape (N,M)
+
+        N: Number of Molecules
+        M: Bitvector Feature Length
         """
-
-        sparse = {}
-        lookup = {}
-
-        self.csv_frame.apply(
-            lambda x: sparse.update(
-                {
-                    x.idx: set([int(i) for i in x.OnBits.split(",")])
-                }),
-            axis=1
+        self.mat = np.zeros(
+            (len(self), self.bitspace), dtype=np.int8
         )
 
-        self.csv_frame.apply(
-            lambda x: lookup.update(
-                {
-                    x.idx: x.LigandID
-                }),
-            axis=1
+    def populate_mat(self):
+        """
+        sets activations for each molecule by iterating through onbits
+        """
+        for idx, onbits in enumerate(self.frame.OnBits):
+            for jdx in self.iter_bits(onbits):
+                self.mat[idx, jdx] = True
+
+    def iter_bits(self, onbits):
+        """
+        generator to transform csv-string representation
+        of activations into integers
+        """
+        for b in onbits.strip().split(","):
+            yield int(b)
+
+    def get_activations(self, index):
+        """
+        returns activations for a given molecule
+        """
+        return np.flatnonzero(self.mat[index])
+
+    def get_dense(self, index):
+        """
+        returns dense array of activations for a given molecule
+        """
+        return self.mat[index]
+
+    def iter_dense(self):
+        for idx in self:
+            yield self.get_dense(idx)
+
+    def pdist(self, metric='jaccard'):
+        """
+        calculate pairwise distances within a matrix
+        """
+        self.distmat = squareform(
+            PairwiseDistance(self.mat, metric=metric)
         )
 
-        return sparse, lookup
-
-    def _mean_activation(self):
-        """
-        finds the mean number of activations across chemical space
-
-        (i.e. the largest value across the sparse vectors)
-        """
-
-        mean_activation = 0
-
-        for s in self.sparse:
-            num_activation = len(self.sparse[s])
-
-            mean_activation += num_activation
-
-        return mean_activation / len(self.sparse)
-
-    def PairwiseIter(self):
-        """
-        iterates unique pairwise combinations of observations
-        """
-
-        for idx, i_bits in self.__iter__():
-
-            for jdx, j_bits in self.__iter__():
-
-                if jdx <= idx:
-                    continue
-
-                yield idx, jdx, i_bits, j_bits
-
-    def GetMolecule(self, index):
-        """
-        Returns sparse molecular values of a given index
-
-        Will map index to ligand id and return sparse.
-        """
-        return self.sparse[self.lookup[index]]
-
-    def __iter__(self):
-        idx_order = sorted([i for i in self.sparse])
-        for idx in idx_order:
-            yield (idx, self.sparse[idx])
+        return self.distmat
 
     def __len__(self):
-        return len(self.sparse)
+        """
+        returns number of molecules in ligand dataset
+        """
+        return self.frame.shape[0]
+
+    def __iter__(self):
+        for idx in np.arange(self.size):
+            yield idx
 
 
-class Clustering():
+class Clustering:
+    def __init__(self, metric='euclidean', seed=None):
+        if seed:
+            np.random.seed(seed)
 
-    """
-    Parent class for HierarchicalClustering and PartitionClustering
-    """
+        if metric == 'euclidean':
+            self.fn_metric = euclidean
+        else:
+            self.fn_metric = jaccard
 
-    def __init__(self, ligands, metric='jaccard', **kwargs):
+    def pdist(self, data):
+        return squareform(
+            PairwiseDistance(data, metric=self.metric)
+            )
 
-        self.ligands = ligands
-        self.metric = metric
+    def paired_distance(self, x, arr_y):
+        """
+        calculate distances between x and all values in arr_y
+        """
+        distances = np.zeros(arr_y.shape[0])
+        for i, y in enumerate(arr_y):
+            distances[i] = self.fn_metric(x, y)
+        return distances
 
-        self.distvec = np.array([])
-        self.index_tup_vec = dict()
-        self.index_vec_tup = dict()
+    def argmin(self, x):
+        m = np.min(x)
+        return np.random.choice(
+            np.flatnonzero(x == m)
+        )
+
+    def fit(self, *args, **kwargs):
+        return self.__fit__(*args, **kwargs)
+
+
+class PartitionClustering(Clustering):
+
+    def initialize_centroids(self):
+        """
+        k++ algorithm for initializing centroids
+        """
+
+        # initialize uniform probability
+        prob = np.ones(self.n)
+        prob /= prob.sum()
+
+        # contains chosen indices
+        self._k_indices = []
+
+        # contains centroids
+        centroids = np.zeros((self.k, self.m))
+
+        # initialize k centroids
+        for k in np.arange(self.k):
+
+            # select observation with some probability
+            c_idx = np.random.choice(self.n, p=prob)
+
+            # append choice to container
+            self._k_indices.append(c_idx)
+
+            # initialize distance matrix at epoch
+            distances = np.zeros((self.n, len(self._k_indices)))
+
+            # for each existing centroid
+            for i in np.arange(len(self._k_indices)):
+
+                # calculate distances of all points to that centroid
+                distances[:, i] = self.paired_distance(
+                    self.data[self._k_indices[i]],
+                    self.data[np.arange(self.n)]
+                ) ** 2
+
+            # take minimal distance across all centroids
+            sq_distances = np.min(distances, axis=1)
+
+            # set already chosen points probability to zero
+            sq_distances[self._k_indices] = 0
+
+            # normalize distances to probabilities
+            prob = sq_distances / sq_distances.sum()
+
+            # assign centroid to container
+            centroids[k] = self.data[c_idx]
+
+        return centroids
+
+    def assign_centroids(self):
+        """
+        assign all observations to their closest centroid
+        """
+
+        # iterate through observations
+        for idx in np.arange(self.n):
+
+            # calculate distances to centroids
+            k_dist = self.paired_distance(
+                self.data[idx], self.centroids
+            )
+
+            # save centroid scores
+            self._scores[idx] = k_dist
+
+            # assign label to nearest centroid
+            self.labels[idx] = self.argmin(k_dist)
+
+    def update_centroids(self):
+        """
+        create new centroids from the means of their members
+
+        return a distance
+        """
+
+        distances = np.zeros(self.k)
+        self.new_centroids = self.centroids.copy()
+
+        for k in np.arange(self.k):
+
+            members = np.flatnonzero(self.labels == k)
+
+            if members.size == 0:
+                continue
+
+            updated_centroid = self.data[members].mean(axis=0)
+
+            distances[k] = np.abs((updated_centroid - self.centroids[k]).sum())
+
+            self.new_centroids[k] = updated_centroid
+
+        return distances.sum()
+
+    def score(self):
+        """
+        calculate silhouette scores for each observation
+        """
+
+        # initialize silhouette score array
+        s_i = np.zeros(self.n)
+
+        # iterate through each observation
+        for i in np.arange(self.n):
+
+            # subset observation's cached centroid distances
+            vals = self._scores[i]
+
+            # subset observation's label
+            label = self.labels[i]
+
+            # initialize mask of all clusters observation is outside
+            mask = np.arange(self.k) != label
+
+            # cohesion : within-cluster distance
+            a_i = vals[label]
+
+            # separation : minimum between-cluster distance
+            if mask.sum() == 0:  # case where only 1 k given
+                b_i = 0
+            else:
+                b_i = np.min(vals[mask])
+
+            # calculates silhouette coefficient
+            if (a_i == 0) & (b_i == 0):  # case where division by zero
+                score = 0
+            else:
+                score = (b_i-a_i) / np.max([a_i, b_i])
+
+            s_i[i] = score
+
+        return s_i
+
+    def __fit__(self, data, k, max_iter=100):
+        """
+        K-Means Implementation
+        """
+
+        # cache inputs
+        self.data = data
+        self.k = k
+
+        # dimensions of input data
+        self.n = self.data.shape[0]
+        self.m = self.data.shape[1]
 
         # initialize empty labels array
-        self.labels = np.array([])
+        self.labels = np.zeros(self.n, dtype=np.int_)
 
-        self._build_distmat()
+        # initialize empty centroid distance cache
+        self._scores = np.zeros((self.n, self.k))
 
-    def jaccard(self, x, y):
-        """
-        Implements Jaccard Distance
-        Intersection / Union
+        # initialize centroids
+        self.centroids = self.initialize_centroids()
 
-        Params:
-        ------
-        x :
-            a set of values
-        y :
-            a set of values
+        # catches cases where k < 2
+        if self.k < 2:
+            self.assign_centroids()
+            return self.labels
 
-        Returns:
-        -------
-        distance :
-            float
-        """
-
-        size_ix = len(x.intersection(y))
-        size_un = len(x.union(y))
-        similarity = (size_ix / size_un)
-        distance = 1 - similarity
-
-        return distance
-
-    def _distance(self, x, y):
-
-        if self.metric == "jaccard":
-            return self.jaccard(x, y)
         else:
-            print("Given Metric <{}> not implemented".format(self.metric))
-            sys.exit()
 
-    def _build_distmat(self):
-        """
-        initializes pairwise distances for ligand set
-        """
+            iter = 0
+            current_distance = np.inf
 
-        num_ligands = len(self.ligands)
-        num_comparisons = int((num_ligands * (num_ligands - 1)) / 2)
+            while True:
 
-        self.distvec = np.zeros(num_comparisons)
-        self.index_tup_vec = dict()
-        self.index_vec_tup = dict()
+                # assign each observation to a centroid
+                self.assign_centroids()
 
-        for index, vals in enumerate(self.ligands.PairwiseIter()):
-            idx, jdx, i_bits, j_bits = vals
+                # calculate global centroid movement cost
+                distance = self.update_centroids()
 
-            self.index_tup_vec[(idx, jdx)] = index
-            self.index_vec_tup[index] = (idx, jdx)
+                # if centroids are moving to minimize distance
+                if distance < current_distance:
 
-            self.distvec[index] = self._distance(i_bits, j_bits)
+                    # set new global distance to beat
+                    current_distance = distance
 
-    def _get_distance(self, idx, jdx):
-        """
-        finds distance between ligand index <idx> and ligand index <jdx>
-        """
-        if idx < jdx:
-            return self.distvec[self.index_tup_vec[(idx, jdx)]]
-        else:
-            return self.distvec[self.index_tup_vec[(jdx, idx)]]
+                    # update centroids
+                    self.centroids = self.new_centroids
 
-    def _pairwise_iter(self, arr):
-        """
-        generic generator for unique pairwise iteration
-        """
+                # quit if the max iterations are hit
+                elif iter == max_iter:
+                    break
 
-        for idx, x in enumerate(arr):
-            for jdx, y in enumerate(arr):
-                if jdx <= idx:
-                    continue
+                # quit if centroids moved and increased global distance
+                else:
+                    break
 
-                yield (x, y)
-
-    def _get_cluster_members(self, c):
-        """
-        returns indices of cluster <c> members
-        """
-        return np.flatnonzero(self.labels == c)
-
-    def fit(self, **kwargs):
-        return self.__fit__(**kwargs)
+            return self.labels
 
 
 class HierarchicalClustering(Clustering):
 
-    """
-    Methods for Hierarchical Clustering
-    """
+    def linkage_single(self, d):
+        return d.min()
 
-    def _labels(self):
-        """
-        initially populates cluster <--> ligand mappings
-        """
-        return np.arange(len(self.ligands))
+    def linkage_complete(self, d):
+        return d.max()
 
-    def _linkage_matrix(self):
+    def linkage_average(self, d):
+        return d.mean()
+
+    def init_linkage_matrix(self):
         """
         a linkage matrix specified by scipy linkage matrix format
 
         2D matrix (n-1, 4):
             [cls_i, cls_j, dist, # original observations in new cluster]
         """
-        n = len(self.ligands)
-        return np.zeros((n-1, 4))
+        return np.zeros(
+            (self.n-1, 4)
+            )
 
-    def _update_clusters(self, x, y, verbose=False):
+    def init_label_lineage(self):
+        """
+        initialize lineage of labels
+        """
+        return np.zeros(
+            (self.n-1, self.n), dtype=np.int32
+        )
+
+    def init_labels(self):
+        """
+        initializes unique label for each observation
+        """
+
+        return np.arange(self.n)
+
+    def minimal_distance(self):
+        """
+        finds the minimal distance between all clusters and
+        returns pair and distance
+        """
+
+        # find all unique cluster labels
+        unique_clusters = np.unique(self.labels)
+
+        # initialize variables
+        min_dist = 0
+        min_pair = None
+
+        # iterate through unique pairs of labels
+        iter = 0
+        for i, j in PairwiseIter(unique_clusters.size):
+
+            label_i = unique_clusters[i]
+            label_j = unique_clusters[j]
+
+            # check if distance has already been done
+            if (label_i, label_j) not in self.memo:
+
+                # find indices of cluster members
+                m1 = np.flatnonzero(self.labels == label_i)
+                m2 = np.flatnonzero(self.labels == label_j)
+
+                # build interaction of indices
+                indices = np.ix_(m1, m2)
+
+                # subset distance matrix to reflect interaction of indices
+                all_distances = self.distmat[indices].ravel()
+
+                # calculate linkage distance
+                linkage_distance = self.linkage_method(all_distances)
+
+                # fill memoization
+                self.memo[(label_i, label_j)] = linkage_distance
+
+            # draw from existing memoization
+            else:
+                linkage_distance = self.memo[(label_i, label_j)]
+
+            # accept linkage as new minima or continue
+            if (linkage_distance <= min_dist) | (iter == 0):
+                min_dist = linkage_distance
+                min_pair = (label_i, label_j)
+
+            iter += 1
+
+        return min_pair, min_dist
+
+    def update_linkage_matrix(self, pair, dist, iter):
+        """
+        updates linkage matrix of incoming merge
+        """
+
+        # splits pair into labels
+        x, y = pair
+
+        # calculates number of nodes in new merger
+        num_orig = (self.labels == x).sum() + (self.labels == y).sum()
+
+        # updates linkage with merge
+        self.zmat[iter] = np.array([
+            int(x), int(y), dist, int(num_orig)
+        ])
+
+    def update_label_lineage(self, iter):
+        self.label_lineage[iter] = self.labels
+
+    def update_clusters(self, pair):
         """
         merges cluster X and cluster Y into a single cluster of label z
         """
 
+        # split pair into labels
+        x, y = pair
+
+        # name of new label
         z = self.num_clusters
+
+        # increment number of labels
         self.num_clusters += 1
 
-        if verbose:
-            print("Merging {} & {} -> {}".format(x, y, z))
+        # select for all indices of x or y
+        label_indices = np.flatnonzero(
+            (self.labels == x) | (self.labels == y)
+        )
 
-        label_indices = np.flatnonzero((self.labels == x) | (self.labels == y))
+        # update merged labels to reflect new cluster label
         self.labels[label_indices] = z
 
-    def _update_linkage(self, x, y, dist, iter):
+    def get_lineage(self):
         """
-        update linkage matrix
-        """
-        num_orig = np.flatnonzero(self.labels == x).size + \
-            np.flatnonzero(self.labels == y).size
-
-        self.zmat[iter] = np.array([int(x), int(y), dist, int(num_orig)])
-
-    def _get_cluster_distances(self, x, y):
-        """
-        returns the array of distances between all x and y pairs
+        return lineage of labels
         """
 
-        dist_arr = np.zeros(x.size * y.size)
-        idx = 0
+        return self.label_lineage
 
-        for i in x:
-            for j in y:
-                dist_arr[idx] = self._get_distance(i, j)
-                idx += 1
-
-        return dist_arr
-
-    def _linkage_single(self, d):
+    def score(self, idx):
         """
-        implements single linkage
-
-        minimum distance between points in clusters
+        score the clustering at a given epoch
         """
 
-        return np.min(d)
+        # initialize silhouette score array
+        s_i = np.zeros(self.n)
 
-    def _linkage_complete(self, d):
-        """
-        implements complete linkage
+        # iterate through each observation
+        for i in np.arange(self.n):
 
-        maximum distance between points in clusters
-        """
-        return np.max(d)
+            # subset observation's label
+            label = self.label_lineage[idx, i]
 
-    def _linkage_average(self, d):
-        """
-        implements average linkage
+            # cohesion : within-cluster distance
+            cluster_members = np.flatnonzero(self.label_lineage[idx] == label)
 
-        average distance between points in clusters
-        """
-        return np.mean(d)
+            if cluster_members.size > 1:
+                a_i = np.mean([
+                    self.memo[
+                        tuple(sorted((i, j)))
+                        ] for j in cluster_members[cluster_members != i]
+                ])
+            else:
+                a_i = 0
 
-    def _linkage(self, x, y):
-        """
-        calculates pairwise distance between clusters and applies
-        chosen linkage method
-        """
+            # separation : minimum between-cluster distance
+            cluster_distances = []
 
-        dists = self._get_cluster_distances(x, y)
-
-        return self.linkage_method(dists)
-
-    def _cluster_members(self):
-        """
-        organizes current clusters and members
-        """
-
-        self.unique_clusters = np.unique(self.labels)
-        self.cluster_members = {
-            u: self._get_cluster_members(u) for u in self.unique_clusters
-        }
-
-        return self.unique_clusters, self.cluster_members
-
-    def _minimum_distance(self, verbose=False):
-        """
-        Finds the minimum distance specificed by the linkage method between
-        all clusters
-        """
-
-        self.unique_clusters, self.cluster_members = self._cluster_members()
-        min_dist = 1
-        min_pair = None
-
-        for c1, c2 in self._pairwise_iter(self.unique_clusters):
-
-            dist = self._linkage(
-                self.cluster_members[c1],
-                self.cluster_members[c2]
+            for u in np.unique(self.label_lineage[idx]):
+                if u == label:
+                    continue
+                cluster_members = np.flatnonzero(self.label_lineage[idx] == u)
+                cluster_distances.append(
+                    np.mean([
+                        self.memo[
+                            tuple(sorted((i, j)))
+                            ] for j in cluster_members
+                    ])
                 )
 
-            if dist <= min_dist:
-                min_dist = dist
-                min_pair = (c1, c2)
+            b_i = np.min(cluster_distances)
 
-        if verbose:
-            print(min_dist, min_pair)
+            # calculates silhouette coefficient
+            if (a_i == 0) & (b_i == 0):  # case where division by zero
+                score = 0
+            else:
+                score = (b_i-a_i) / np.max([a_i, b_i])
 
-        x, y = min_pair
-        return x, y, min_dist
+            s_i[i] = score
 
-    def __fit__(self, linkage="single", verbose=False):
+        return s_i
 
+    def __fit__(self, data, linkage='single', precomputed=True):
+
+        if precomputed:
+            self.distmat = data
+        else:
+            self.distmat = PairwiseDistance(data, metric=self.metric)
+
+        self.n = self.distmat.shape[0]
+
+        # define linkage method
         self.linkages = {
-            "single": self._linkage_single,
-            "complete": self._linkage_complete,
-            "average": self._linkage_average
+            "single": self.linkage_single,
+            "complete": self.linkage_complete,
+            "average": self.linkage_average
         }
-
-        # defines linkage method
         self.linkage_method = self.linkages[linkage]
+        self.memo = {}
 
-        # initializes linkage matrix
-        self.zmat = self._linkage_matrix()
+        # initialize linkage matrix
+        self.zmat = self.init_linkage_matrix()
 
-        # populates initial labels
-        self.labels = self._labels()
+        # initialize global label matrix
+        self.label_lineage = self.init_label_lineage()
 
-        # tracks number of unique cluster labels
+        # populate initial labels
+        self.labels = self.init_labels()
+
+        # track number of unique cluster labels (will increase with mergers)
         self.num_clusters = self.labels.size
 
         # main loop
-        for iter in np.arange(self.zmat.shape[0]):
+        for iter in tqdm(np.arange(self.zmat.shape[0])):
 
             # find minimal distance
-            x, y, dist = self._minimum_distance(verbose=verbose)
+            pair, dist = self.minimal_distance()
 
             # update linkage matrix
-            self._update_linkage(x, y, dist, iter)
+            self.update_linkage_matrix(pair, dist, iter)
 
-            # merge clusters of minimal pairs
-            self._update_clusters(x, y, verbose=verbose)
+            # merge clusters of minimap pairs
+            self.update_clusters(pair)
 
-        # returns linkage matrix
+            # update label lineage
+            self.update_label_lineage(iter)
+
+        # return linkage matrix
         return self.zmat
 
 
-class PartitionClustering(Clustering):
-
-    """
-    Methods for K-Means Partition Clustering
-    """
-
-    def _member_activations(self, members):
-        """
-        yield all activations found in a cluster
-        """
-        for m in members:
-            for activation in self.ligands.sparse[m]:
-                yield activation
-
-    def _mean_member_activations(self, members):
-        """
-        calculate the mean number of activations across members
-        """
-        activations = np.array([
-            len(self.ligands.sparse[m]) for m in members
-        ])
-        if activations.size == 0:
-            return 1
-        else:
-            return activations.mean()
-
-    def _get_activation_frequencies(self, members):
-        """
-        get the frequencies of activations across a cluster membership
-        """
-
-        # initialize empty frequencies
-        frequencies = np.zeros(self.ligands.bitspace)
-
-        # gather all activations seen across members
-        all_activations = np.array([
-            a for a in self._member_activations(members)
-        ])
-
-        # counts of each unique activations in cluster
-        activations, counts = np.unique(all_activations, return_counts=True)
-
-        # assign frequency position (missing activations stay zero)
-        try:
-            frequencies[activations] = counts
-        except IndexError:
-            frequencies[np.random.choice(frequencies.size)] = 1
-
-        # convert to probability
-        frequencies = frequencies / frequencies.sum()
-
-        return frequencies
-
-    def _weighted_centroid(self, n, p):
-        """
-        creates a new centroid with a given multinomial parameterization
-        """
-        mn = np.random.multinomial(n, p)
-        return set(np.flatnonzero(mn))
-
-    def _initialize_centroids(self):
-        """
-        initializes <k> centroids as <k> random points in space (k++ method)
-        """
-        centroids = []
-        for i in range(self.k):
-            random_point = self.ligands.sparse[
-                np.random.choice(len(self.ligands) + 1)
-                ]
-            centroids.append((i, random_point))
-
-        return centroids
-
-    def _assign_centroids(self):
-        """
-        assigns each ligand to its closest centroid
-        """
-
-        for lig_idx, lig_bits in self.ligands:
-
-            distances = np.array([
-                self._distance(lig_bits, bits) for idx, bits in self.centroids
-            ])
-
-            assignment = np.random.choice(
-                np.flatnonzero(distances == distances.max())
-                )
-
-            self.labels[lig_idx] = assignment
-
-    def _intercluster_distance(self, k):
-        """
-        sum pairwise distances within a cluster <k>
-        """
-
-        clust = self._get_cluster_members(k)
-        distances = np.array([
-            self._get_distance(x, y) for x, y in self._pairwise_iter(clust)
-        ])
-
-        return distances.sum()
-
-    def _evaluate_clusters(self):
-        """
-        sums inter-cluster distances across all clusters
-        """
-
-        cluster_distances = np.array([
-            self._intercluster_distance(k) for k in range(self.k)
-        ])
-
-        return cluster_distances.sum()
-
-    def _update_centroids(self):
-        """
-        updates centroids to reflect members
-        """
-
-        for k in range(self.k):
-
-            # retrieve members of a cluster
-            members = self._get_cluster_members(k)
-
-            # calculate mean activations across members
-            mean_activations = self._mean_member_activations(members)
-
-            # calculate activation frequencies
-            frequencies = self._get_activation_frequencies(members)
-
-            # build centroid with multinomial derived activations
-            centroid = self._weighted_centroid(mean_activations, frequencies)
-
-            self.centroids[k] = (k, centroid)
-
-    def __fit__(self, k, seed=42, max_iter=200):
-        """
-        implements k-means clustering
-
-        will return the minimum score and cluster labels at that score
-        """
-        np.random.seed(seed)
-        self.k = k
-
-        self.centroids = self._initialize_centroids()
-        self.labels = np.zeros(len(self.ligands), dtype=int)
-
-        iter = 0
-
-        self.current_min = 0
-        self.current_labels = self.labels.copy()
-        while iter < max_iter:
-
-            self._assign_centroids()
-            total_distances = self._evaluate_clusters()
-
-            if (total_distances < self.current_min) | (iter == 0):
-                self.current_min = total_distances
-                self.current_labels = self.labels.copy()
-
-            self._update_centroids()
-
-            iter += 1
-
-        return self.current_min, self.current_labels
-
-
-class qCluster():
-
-    """
-    Evaluates the quality of a given clustering scheme
-    """
-
-    pass
-
-
-class simCluster():
-
-    """
-    Evaluates the similarity between a set of a clusters
-    """
-
-    pass
-
-
 def main():
-    ligand_obj = Ligand("../data/test_set.csv")
-    # hcl = HierarchicalClustering(ligand_obj)
-    # hcl.fit(verbose=True, linkage="single")
-
-    pcl = PartitionClustering(ligand_obj)
-    score, labels = pcl.fit(k=50)
+    pass
 
 
 if __name__ == '__main__':
