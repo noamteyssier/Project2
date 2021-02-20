@@ -241,22 +241,38 @@ jaccard index over all observations.</p>
 <dl class="py class">
 <dt id="clusters.algs.HierarchicalClustering">
 <em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">HierarchicalClustering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Implementation of Hierarchical Agglomerative Clustering</p>
+<dl class="py method">
 <dt id="clusters.algs.HierarchicalClustering.get_lineage">
 <code class="sig-name descname">get_lineage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.get_lineage" title="Permalink to this definition">¶</a></dt>
-<dd><p>return lineage of labels</p>
+<dd><p>Gets label lineage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>2D array of labels at each epoch</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="clusters.algs.HierarchicalClustering.init_label_lineage">
 <code class="sig-name descname">init_label_lineage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.init_label_lineage" title="Permalink to this definition">¶</a></dt>
 <dd><p>initialize lineage of labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>2D Matrix representing labels at each epoch</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="clusters.algs.HierarchicalClustering.init_labels">
 <code class="sig-name descname">init_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.init_labels" title="Permalink to this definition">¶</a></dt>
 <dd><p>initializes unique label for each observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>1D array representing labels for each observation</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -267,6 +283,53 @@ jaccard index over all observations.</p>
 <dt>2D matrix (n-1, 4):</dt><dd><p>[cls_i, cls_j, dist, # original observations in new cluster]</p>
 </dd>
 </dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>2D Linkage Matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.linkage_average">
+<code class="sig-name descname">linkage_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.linkage_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linkage Calculation Average</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> – 1D array of distances</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Average Linkage (Mean) (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.linkage_complete">
+<code class="sig-name descname">linkage_complete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.linkage_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linkage Calculation Complete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> – 1D array of distances</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Complete Linkage (Maximum) (float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.linkage_single">
+<code class="sig-name descname">linkage_single</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.linkage_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linkage Calculation Single</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> – 1D array of distances</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Single Linkage (Minimum) (float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -274,18 +337,41 @@ jaccard index over all observations.</p>
 <code class="sig-name descname">minimal_distance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.minimal_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>finds the minimal distance between all clusters and
 returns pair and distance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(pair of indices as tuple, minimum distance (float))</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="clusters.algs.HierarchicalClustering.score">
 <code class="sig-name descname">score</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.score" title="Permalink to this definition">¶</a></dt>
-<dd><p>score the clustering at a given epoch</p>
+<dd><p>Calculates silhouette coefficients of clustering at a given epoch</p>
+<p>a_i = cohesion (mean within-cluster distance)
+b_i = separation (minimum mean between-cluster distance)
+s_i = silhouette coefficient</p>
+<p>s_i = (b_i - a_i) / max(a_i, b_i)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>idx</strong> – epoch to calculate silhouette coefficients</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of silhouette coefficients</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="clusters.algs.HierarchicalClustering.update_clusters">
 <code class="sig-name descname">update_clusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pair</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.update_clusters" title="Permalink to this definition">¶</a></dt>
 <dd><p>merges cluster X and cluster Y into a single cluster of label z</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="clusters.algs.HierarchicalClustering.update_label_lineage">
+<code class="sig-name descname">update_label_lineage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.HierarchicalClustering.update_label_lineage" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates current epoch with current labels</p>
 </dd></dl>
 
 <dl class="py method">
@@ -398,7 +484,8 @@ M: Bitvector Feature Length</p>
 <dl class="py class">
 <dt id="clusters.algs.PartitionClustering">
 <em class="property">class </em><code class="sig-prename descclassname">clusters.algs.</code><code class="sig-name descname">PartitionClustering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Implementation of KMeans Clustering</p>
+<dl class="py method">
 <dt id="clusters.algs.PartitionClustering.assign_centroids">
 <code class="sig-name descname">assign_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.assign_centroids" title="Permalink to this definition">¶</a></dt>
 <dd><p>assign all observations to their closest centroid</p>
@@ -413,14 +500,27 @@ M: Bitvector Feature Length</p>
 <dl class="py method">
 <dt id="clusters.algs.PartitionClustering.score">
 <code class="sig-name descname">score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.score" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate silhouette scores for each observation</p>
+<dd><p>calculate silhouette coefficients for each observation.</p>
+<p>a_i = cohesion (mean within-cluster distance)
+b_i = separation (minimum mean between-cluster distance)
+s_i = silhouette coefficient</p>
+<p>s_i = (b_i - a_i) / max(a_i, b_i)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>array of silhouette coefficients</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="clusters.algs.PartitionClustering.update_centroids">
 <code class="sig-name descname">update_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clusters.algs.PartitionClustering.update_centroids" title="Permalink to this definition">¶</a></dt>
 <dd><p>create new centroids from the means of their members</p>
-<p>return a distance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>global distance (float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
