@@ -55,6 +55,32 @@ def PairwiseDistance(m, metric='euclidean'):
     return distances
 
 
+def ClusterSimilarity(label_x, label_y):
+    """
+    Calculates similarity between two cluster labels
+    """
+
+    assert label_x.size == label_y.size, "Requires Equal Sized Arrays"
+
+    similarities = np.zeros(label_x.size)
+
+    # iterates through observations
+    for idx in np.arange(label_x.size):
+
+        # identify labels at position idx
+        lx = label_x[idx]
+        ly = label_y[idx]
+
+        # identify neighbors for each label set
+        nx = set(np.flatnonzero(label_x == lx))
+        ny = set(np.flatnonzero(label_y == ly))
+
+        # calculates jaccard similarity between both sets
+        similarities[idx] = len(nx.intersection(ny)) / len(nx.union(ny))
+
+    # returns mean similarity over all observations
+    return similarities.mean()
+
 class Ligand():
 
     def __init__(self, fn, bitspace=1024):
@@ -394,6 +420,14 @@ class HierarchicalClustering(Clustering):
             (self.n-1, 4)
             )
 
+    def init_label_lineage(self):
+        """
+        initialize lineage of labels
+        """
+        return np.zeros(
+            (self.n-1, self.n), dtype=np.int32
+        )
+
     def init_labels(self):
         """
         initializes unique label for each observation
@@ -421,18 +455,28 @@ class HierarchicalClustering(Clustering):
             label_i = unique_clusters[i]
             label_j = unique_clusters[j]
 
-            # find indices of cluster members
-            m1 = np.flatnonzero(self.labels == label_i)
-            m2 = np.flatnonzero(self.labels == label_j)
+            # check if distance has already been done
+            if (label_i, label_j) not in self.memo:
 
-            # build interaction of indices
-            indices = np.ix_(m1, m2)
+                # find indices of cluster members
+                m1 = np.flatnonzero(self.labels == label_i)
+                m2 = np.flatnonzero(self.labels == label_j)
 
-            # subset distance matrix to reflect interaction of indices
-            all_distances = self.distmat[indices].ravel()
+                # build interaction of indices
+                indices = np.ix_(m1, m2)
 
-            # calculate linkage distance
-            linkage_distance = self.linkage_method(all_distances)
+                # subset distance matrix to reflect interaction of indices
+                all_distances = self.distmat[indices].ravel()
+
+                # calculate linkage distance
+                linkage_distance = self.linkage_method(all_distances)
+
+                # fill memoization
+                self.memo[(label_i, label_j)] = linkage_distance
+
+            # draw from existing memoization
+            else:
+                linkage_distance = self.memo[(label_i, label_j)]
 
             # accept linkage as new minima or continue
             if (linkage_distance <= min_dist) | (iter == 0):
@@ -459,6 +503,9 @@ class HierarchicalClustering(Clustering):
             int(x), int(y), dist, int(num_orig)
         ])
 
+    def update_label_lineage(self, iter):
+        self.label_lineage[iter] = self.labels
+
     def update_clusters(self, pair):
         """
         merges cluster X and cluster Y into a single cluster of label z
@@ -481,6 +528,62 @@ class HierarchicalClustering(Clustering):
         # update merged labels to reflect new cluster label
         self.labels[label_indices] = z
 
+    def get_lineage(self):
+        """
+        return lineage of labels
+        """
+
+        return self.label_lineage
+
+    def score(self, idx):
+        """
+        score the clustering at a given epoch
+        """
+
+        # initialize silhouette score array
+        s_i = np.zeros(self.n)
+
+        # iterate through each observation
+        for i in np.arange(self.n):
+
+            # subset observation's label
+            label = self.label_lineage[idx, i]
+
+            # cohesion : within-cluster distance
+            cluster_members = np.flatnonzero(self.label_lineage[idx] == label)
+
+            if cluster_members.size > 1:
+                a_i = np.mean([
+                    self.memo[tuple(sorted((i, j)))] for j in cluster_members[cluster_members != i]
+                ])
+            else:
+                a_i = 0
+
+            # separation : minimum between-cluster distance
+            cluster_distances = []
+
+            for u in np.unique(self.label_lineage[idx]):
+                if u == label:
+                    continue
+                cluster_members = np.flatnonzero(self.label_lineage[idx] == u)
+                cluster_distances.append(
+                    np.mean([
+                        self.memo[tuple(sorted((i, j)))] for j in cluster_members
+                    ])
+                )
+
+            b_i = np.min(cluster_distances)
+
+            # calculates silhouette coefficient
+            if (a_i == 0) & (b_i == 0):  # case where division by zero
+                score = 0
+            else:
+                score = (b_i-a_i) / np.max([a_i, b_i])
+
+            s_i[i] = score
+
+        return s_i
+
     def __fit__(self, data, linkage='single', precomputed=True):
 
         if precomputed:
@@ -497,9 +600,13 @@ class HierarchicalClustering(Clustering):
             "average": self.linkage_average
         }
         self.linkage_method = self.linkages[linkage]
+        self.memo = {}
 
         # initialize linkage matrix
         self.zmat = self.init_linkage_matrix()
+
+        # initialize global label matrix
+        self.label_lineage = self.init_label_lineage()
 
         # populate initial labels
         self.labels = self.init_labels()
@@ -519,15 +626,18 @@ class HierarchicalClustering(Clustering):
             # merge clusters of minimap pairs
             self.update_clusters(pair)
 
+            # update label lineage
+            self.update_label_lineage(iter)
+
         # return linkage matrix
         return self.zmat
 
 
 def main():
     ligands = Ligand("../data/test_set.csv")
-    # distmat = ligands.pdist(metric='jaccard')
+    distmat = ligands.pdist(metric='jaccard')
     # np.save("subset.npy", distmat)
-    distmat = np.load("test_set.npy")
+    # distmat = np.load("test_set.npy")
 
     # km = PartitionClustering(metric='euclidean', seed=None)
     # km.fit(distmat, k=15)
@@ -536,7 +646,6 @@ def main():
 
     hc = HierarchicalClustering(metric='euclidean', seed=42)
     hc.fit(distmat)
-
 
 
 if __name__ == '__main__':
