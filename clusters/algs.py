@@ -636,11 +636,3 @@ class HierarchicalClustering(Clustering):
 
         # return linkage matrix
         return self.zmat
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
